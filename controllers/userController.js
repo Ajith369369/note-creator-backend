@@ -52,7 +52,7 @@ exports.registerController = async (req, res) => {
       // Creates a new instance of the users model.
       // The users model corresponds to the user schema in the MongoDB database.
       // The new user's details, including username, email, and password, are assigned.
-      // The github, linkedin, and profile fields are initialized as empty strings.
+      // The profile field is initialized as empty string.
       // This prepares the data to be saved to the database.
       const newUser = new users({
         username,
@@ -118,7 +118,7 @@ exports.loginController = async (req, res) => {
       // If a user is found, this line generates a JWT (JSON Web Token).
       // The token is created using the jwt.sign() method, which takes a payload (in this case, the user's ID) and a secret key ("supersecretkey").
       // The token will be used for authenticating future requests from the client.
-      const token = jwt.sign({ userId: existingUser._id }, "supersecretkey");
+      const token = jwt.sign({ userId: existingUser._id }, "ultimatesupersecretkey");
 
       // Logs the generated token to the console.
       console.log(token);
