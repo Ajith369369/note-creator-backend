@@ -6,5 +6,7 @@
 # git remote add origin https://github.com/Ajith369369/note-creator-backend.git
 # git push -u origin main
 
+# npm i cors dotenv express jsonwebtoken mongoose multer
+
 node_modules
 .env
