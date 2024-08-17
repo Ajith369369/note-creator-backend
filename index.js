@@ -40,7 +40,7 @@ noteCreatorServer.use(router);
 noteCreatorServer.use('/uploads', express.static('./uploads'))
 
 // set port for the server to run
-const PORT = 4000 || process.env.PORT;
+const PORT = 3500 || process.env.PORT;
 
 noteCreatorServer.listen(PORT, () => {
   console.log(`Server running successfully at PORT NUMBER: ${PORT}`);
