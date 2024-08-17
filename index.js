@@ -1,23 +1,67 @@
-// import json server using require keyword, jsonServer library
-const jsonServer = require("json-server");
+// import dotenv
+require("dotenv").config(); // loads env variable
 
-// create json server using create method
-const noteCreatorServer = jsonServer.create();
+// import express
+const express = require("express");
 
-// create path for json file(data) - router()
-const router = jsonServer.router("db.json");
+// import cors
+const cors = require("cors");
 
-// create middleware to parse json
-const middleware = jsonServer.defaults();
+// import router
+const router = require("./routes");
 
-// allow server to use router and middleware
-noteCreatorServer.use(middleware);
+// import MongoDB connection file
+require("./connection");
+
+// Not used in this project
+// Application-specific Middleware
+// const appmiddleware = require("./middleware/appMiddleware");
+
+// create server
+const noteCreatorServer = express();
+
+// connect server with frontend
+noteCreatorServer.use(cors());
+
+// parse json format of data received at the server side - json()
+noteCreatorServer.use(express.json());
+
+// Not used in this project
+// Application-specific Middleware
+// noteCreatorServer.use(appmiddleware);
+
+// router
 noteCreatorServer.use(router);
 
-// set up port for the server to run (default port)
-PORT = 3000 || process.env.PORT;
+// static() is used to export a file/folder from the server-side.
+// 1st argument ('/uploads') - The name by which other application (frontend) should use the exported file/folder.
+// 2nd argument ('./uploads') - The path of the file/folder which needs to be exported.
+// The file could be seen in: "http://localhost:4000/uploads/image-1723704799894-Media Player.png"
+noteCreatorServer.use('/uploads', express.static('./uploads'))
 
-// listen to the request
+// set port for the server to run
+const PORT = 4000 || process.env.PORT;
+
 noteCreatorServer.listen(PORT, () => {
-  console.log(`Server running successfully at port number, ${PORT}...`);
+  console.log(`Server running successfully at PORT NUMBER: ${PORT}`);
 });
+
+// use nodemon index.js because servers don't have auto-compilation.
+
+// logic
+/* noteCreatorServer.get("/get", (req, res) => {
+  res.send("GET request received.");
+});
+
+noteCreatorServer.post("/post", (req, res) => {
+  res.send("POST request received.");
+});
+
+noteCreatorServer.put("/put", (req, res) => {
+  res.send("PUT request received.");
+});
+
+noteCreatorServer.delete("/delete", (req, res) => {
+  res.send("DELETE request received.");
+});
+ */
