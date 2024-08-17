@@ -9,19 +9,19 @@ const express = require("express");
 
 // import userController
 // This module contains the logic for handling user-related operations. This is imported from the controllers directory.
-const userController = require("./controllers/userController");
+const userController = require("../controllers/userController");
 
 // import projectController
 // This module contains the logic for handling project-related operations. This is imported from the controllers directory.
-const projectController = require("./controllers/projectController");
+// const projectController = require("../controllers/projectController");
 
 // jwt middleware
 // This is middleware used for handling JSON Web Token (JWT) authentication. It ensures that only authenticated users can access certain routes.
-const jwt = require("./middleware/jwtMiddleware");
+const jwt = require("../middleware/jwtMiddleware");
 
 // multer middleware
 // This is middleware used for handling file uploads. It's configured to handle a single file upload for a project image, identified by the form field name "projectImg".
-const multer = require("./middleware/multerMiddleware");
+const multer = require("../middleware/multerMiddleware");
 
 // create object for router class
 // router: This creates a new instance of the Express Router. The router allows you to define routes that can be modularized and used in different parts of the application.
@@ -51,14 +51,14 @@ router.post("/login", userController.loginController);
   // jwt: Ensures the request is authenticated via a JWT.
   // multer.single("projectImg"): Handles the file upload for a single image file, which should be passed with the form field name "projectImg".
 // Allows authenticated users to add a project. The addProjectController function in projectController is executed, processing the uploaded project image along with other project details.
-router.post("/add-project", jwt, multer.single("projectImg"), projectController.addProjectController);
+// router.post("/add-project", jwt, multer.single("projectImg"), projectController.addProjectController);
 // router.post("/add-project", jwt, projectController.addProjectController);
 
 // get home project
-router.get("/home-project", projectController.getHomeProjectController);
+// router.get("/home-project", projectController.getHomeProjectController);
 
 // get all projects
-router.get("/all-project", projectController.getAllProjectController);
+// router.get("/all-project", projectController.getAllProjectController);
 
 // export module to backend
 // Exporting the router

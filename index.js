@@ -8,10 +8,10 @@ const express = require("express");
 const cors = require("cors");
 
 // import router
-const router = require("./routes");
+const router = require("./routes/router");
 
 // import MongoDB connection file
-require("./connection");
+require("./database/connection");
 
 // Not used in this project
 // Application-specific Middleware
