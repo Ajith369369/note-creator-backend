@@ -13,8 +13,11 @@ exports.addNoteOfAUserController = async (req, res) => {
   console.log(noteTitle, noteContent, noteDate);
 
   console.log("req.file: ", req.file);
-  const noteImage = req.file.filename;
+  console.log("req.file.filename: ", req.file.filename);
+
+  const noteImage = req.file.filename
   console.log("noteImage: ", noteImage);
+
   // res.status(200).json("Request received.");
   try {
     // This line performs a query on the notes collection in MongoDB.
@@ -158,12 +161,10 @@ exports.editNoteOfAUserController = async (req, res) => {
 // exports.deleteNoteOfAUserController: This exports the deleteNoteOfAUserController function so it can be used as a route handler in the Express application.
 // async (req, res): Defines an asynchronous function that handles the incoming request (req) and sends a response (res). Asynchronous functions are used to handle operations that involve promises, such as database queries.
 exports.deleteNoteOfAUserController = async (req, res) => {
-
   // req.params: Contains route parameters (e.g., /notes/:id).
   // const { id } = req.params;: Extracts the id parameter from the request. This ID represents the note to be deleted.
   const { id } = req.params;
   try {
-
     // notes.findByIdAndDelete(...): Mongoose method that finds a document by its ID and deletes it.
     // { _id: id }: The query to find the note by its _id (which is the ID extracted from the request parameters).
     // await is used to pause the execution until the findByIdAndDelete operation is complete, allowing the code to wait for the promise to resolve and get the result.
@@ -173,7 +174,6 @@ exports.deleteNoteOfAUserController = async (req, res) => {
     // .json(deleteNote): Sends the deleted note as a JSON response to the client. This allows the client to see which note was deleted.
     res.status(200).json(deleteNote);
   } catch (err) {
-
     // res.status(500).json(error);: Sets the HTTP status code to 500 Internal Server Error and sends the error details in the response. This informs the client that something went wrong on the server.
     // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
     // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
