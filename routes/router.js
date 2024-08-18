@@ -1,5 +1,5 @@
-//  This file defines routes for handling user registration, login, and project addition in a RESTful API.
-// The code sets up a series of API endpoints for user registration, login, and project management.
+//  This file defines routes for handling user registration, login, and note addition in a RESTful API.
+// The code sets up a series of API endpoints for user registration, login, and note management.
 // Middleware like JWT authentication and file upload handling (via Multer) is applied to certain routes to add security and functionality.
 
 // import express
@@ -11,16 +11,16 @@ const express = require("express");
 // This module contains the logic for handling user-related operations. This is imported from the controllers directory.
 const userController = require("../controllers/userController");
 
-// import projectController
-// This module contains the logic for handling project-related operations. This is imported from the controllers directory.
-// const projectController = require("../controllers/projectController");
+// import noteController
+// This module contains the logic for handling note-related operations. This is imported from the controllers directory.
+const noteController = require("../controllers/noteController");
 
 // jwt middleware
 // This is middleware used for handling JSON Web Token (JWT) authentication. It ensures that only authenticated users can access certain routes.
 const jwt = require("../middleware/jwtMiddleware");
 
 // multer middleware
-// This is middleware used for handling file uploads. It's configured to handle a single file upload for a project image, identified by the form field name "projectImg".
+// This is middleware used for handling file uploads. It's configured to handle a single file upload for a note image, identified by the form field name "noteImage".
 const multer = require("../middleware/multerMiddleware");
 
 // create object for router class
@@ -43,22 +43,42 @@ router.post("/register", userController.registerController);
 // Handles user login. When a POST request is made to /login, the loginController function in userController is executed.
 router.post("/login", userController.loginController);
 
-// add project
-// Creates Add Project route
-// Path: /add-project
+// add note of a user
+// Creates Add Note route
+// Path: /notes/user/add
 // Method: POST
 // Middlewares:
-  // jwt: Ensures the request is authenticated via a JWT.
-  // multer.single("projectImg"): Handles the file upload for a single image file, which should be passed with the form field name "projectImg".
-// Allows authenticated users to add a project. The addProjectController function in projectController is executed, processing the uploaded project image along with other project details.
-// router.post("/add-project", jwt, multer.single("projectImg"), projectController.addProjectController);
-// router.post("/add-project", jwt, projectController.addProjectController);
+// jwt: Ensures the request is authenticated via a JWT.
+// multer.single("noteImage"): Handles the file upload for a single image file, which should be passed with the form field name "noteImage".
+// Allows authenticated users to add a note. The addNoteController function in noteController is executed, processing the uploaded note image along with other note details.
+// router.post("/add-note", jwt, noteController.addNoteController);
+router.post(
+  "/notes/user/add",
+  jwt,
+  multer.single("noteImage"),
+  noteController.addNoteOfAUserController
+);
 
-// get home project
-// router.get("/home-project", projectController.getHomeProjectController);
+// get all notes of all users
+// router.get("/notes/all", noteController.getAllNotesOfAllUsersController);
 
-// get all projects
-// router.get("/all-project", projectController.getAllProjectController);
+// get all notes of a user
+router.get("/notes/user/all", jwt, noteController.getAllNotesOfAUserController);
+
+// edit note of a user
+router.put(
+  "/notes/user/edit/:id",
+  jwt,
+  multer.single("noteImage"),
+  noteController.editNoteOfAUserController
+);
+
+// delete note of a user
+router.delete(
+  "/notes/user/delete/:id",
+  jwt,
+  noteController.deleteNoteOfAUserController
+);
 
 // export module to backend
 // Exporting the router

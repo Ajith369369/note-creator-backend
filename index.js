@@ -36,7 +36,7 @@ noteCreatorServer.use(router);
 // static() is used to export a file/folder from the server-side.
 // 1st argument ('/uploads') - The name by which other application (frontend) should use the exported file/folder.
 // 2nd argument ('./uploads') - The path of the file/folder which needs to be exported.
-// The file could be seen in: "http://localhost:4000/uploads/image-1723704799894-Media Player.png"
+// The file could be seen in: "http://localhost:3500/uploads/image-1723704799894-Media Player.png"
 noteCreatorServer.use('/uploads', express.static('./uploads'))
 
 // set port for the server to run
