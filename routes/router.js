@@ -80,6 +80,12 @@ router.delete(
   noteController.deleteNoteOfAUserController
 );
 
+// upload default image
+// This backend route handles file uploads from the client. It uses multer to process and save the uploaded file on the server, then responds with the file's path if successful. If an error occurs, it catches the error and sends a response indicating that the upload failed. This setup allows the frontend to upload images or files to the server, receive the path of the uploaded file, and use it as needed
+// 'noteImage': This is the name of the form field (key) that contains the file being uploaded. It must match the name used in formData.append("noteImage", file) on the frontend.
+// This middleware extracts the uploaded file from the request, processes it (e.g., stores it in a designated folder), and makes it accessible via req.file.
+// router.post('/upload', jwt, multer.single("noteImage"), noteController.uploadDefaultImageForNoteOfAUserController)
+
 // export module to backend
 // Exporting the router
 // This line exports the router object, making it available to be imported and used in the main application (index.js file). This allows the routes defined in this file to be integrated into the larger Express application.

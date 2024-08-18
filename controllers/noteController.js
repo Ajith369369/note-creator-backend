@@ -184,3 +184,27 @@ exports.deleteNoteOfAUserController = async (req, res) => {
     });
   }
 };
+
+/* // (req, res): These are the request and response objects provided by Express. req contains the incoming request data, and res is used to send a response back to the client.
+// req: The request object containing details of the incoming request, including any data sent with it (such as the uploaded file).
+// res: The response object used to send back a response to the client.
+exports.uploadDefaultImageForNoteOfAUserController = async (req, res) => {
+
+  // This block is used for error handling. The try block contains the code that might throw an error, and if an error occurs, the catch block will execute.
+  // This ensures that even if something goes wrong, the server can handle the situation gracefully and return a meaningful error message.
+  try {
+
+    // This line sends a JSON response back to the client.
+    // req.file.filename: multer stores the uploaded file on the server, and filename is the name of the file on the server. By default, multer generates a unique filename to prevent collisions.
+    // filePath: `/uploads/${req.file.filename}: This constructs the file path where the uploaded image is stored on the server. This path is relative to the public directory from which the file can be served.
+    // The client receives this filePath in the response, which it can then use to display the image or store the path in a database.
+    res.json({ filePath: `/uploads/${req.file.filename}` });
+
+    // If any error occurs during the file upload process (e.g., if the file can't be saved or the server has issues), the catch block is executed.
+  } catch (error) {
+
+    // res.status(500): This sets the HTTP status code to 500, indicating an internal server error.
+    // json({ message: "File upload failed", error }): This sends a JSON response back to the client with an error message and the error object, providing details about what went wrong.
+    res.status(500).json({ message: "File upload failed.", error });
+  }
+} */
