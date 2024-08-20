@@ -72,17 +72,35 @@ exports.getAllNotesOfAllUsersController = async (req, res) => {
 
 // get all notes of a user
 exports.getAllNotesOfAUserController = async (req, res) => {
+
+  const searchKey = req.query.search;
+  console.log("searchKey: ", searchKey);
+
+  const query = {
+    noteTitle: {
+      $regex: searchKey,
+      $options: "i",
+    },
+  };
+
   try {
+
+    const allUserNote = await notes.find(query);
+    res.status(200).json(allUserNote);
+
     // userId is the identifier for the user whose notes you want to retrieve.
-    const userId = req.payload;
+    //
+    // const userId = req.payload;
 
     // notes is a Mongoose model representing the notes collection in the MongoDB database.
     // notes.find({ userId }): Filters the notes by userId to fetch only those notes that belong to the specified user.
     // res.status(200): Sets the HTTP status code of the response to 200 OK, indicating that the request was successful.
     // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
     // .json(userNotes): Sends the userNotes data as a JSON response to the client.
-    const userNotes = await notes.find({ userId });
-    res.status(200).json(userNotes);
+    //
+    // const userNotes = await notes.find({ userId });
+    // res.status(200).json(userNotes);
+
   } catch (error) {
     // res.status(500): Sets the HTTP status code of the response to 500 Internal Server Error for unexpected issues.
     // 500 Status Code: This status code stands for "Internal Server Error," indicating that an error occurred on the server side that prevented it from fulfilling the request.
