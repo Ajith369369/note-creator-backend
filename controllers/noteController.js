@@ -115,6 +115,7 @@ exports.getAllNotesOfAUserController = async (req, res) => {
 
 // get a note of a user
 exports.getANoteOfAUserController = async (req, res) => {
+  console.log("Inside getANoteOfAUserController()");
   const { id } = req.params;
 try {
   const aUserNote = await notes.find({ _id: id });
