@@ -113,6 +113,39 @@ exports.getAllNotesOfAUserController = async (req, res) => {
   }
 };
 
+// get a note of a user
+exports.getANoteOfAUserController = async (req, res) => {
+
+try {
+
+  const allUserNote = await notes.find(query);
+  res.status(200).json(allUserNote);
+
+  // userId is the identifier for the user whose notes you want to retrieve.
+  //
+  // const userId = req.payload;
+
+  // notes is a Mongoose model representing the notes collection in the MongoDB database.
+  // notes.find({ userId }): Filters the notes by userId to fetch only those notes that belong to the specified user.
+  // res.status(200): Sets the HTTP status code of the response to 200 OK, indicating that the request was successful.
+  // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
+  // .json(userNotes): Sends the userNotes data as a JSON response to the client.
+  //
+  // const userNotes = await notes.find({ userId });
+  // res.status(200).json(userNotes);
+
+} catch (error) {
+  // res.status(500): Sets the HTTP status code of the response to 500 Internal Server Error for unexpected issues.
+  // 500 Status Code: This status code stands for "Internal Server Error," indicating that an error occurred on the server side that prevented it from fulfilling the request.
+  // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
+  // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
+  // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
+  res
+    .status(500)
+    .json({ message: "An error occurred while fetching user notes", error });
+}
+};
+
 //edit note of a user
 // To update an existing note in the MongoDB database with new information provided in the request.
 // This exports the editNoteOfAUserController function so it can be used as a route handler in the Express application.
