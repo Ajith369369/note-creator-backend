@@ -115,11 +115,10 @@ exports.getAllNotesOfAUserController = async (req, res) => {
 
 // get a note of a user
 exports.getANoteOfAUserController = async (req, res) => {
-
+  const { id } = req.params;
 try {
-
-  const allUserNote = await notes.find(query);
-  res.status(200).json(allUserNote);
+  const aUserNote = await notes.find({ _id: id });
+  res.status(200).json(aUserNote);
 
   // userId is the identifier for the user whose notes you want to retrieve.
   //
@@ -142,7 +141,7 @@ try {
   // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
   res
     .status(500)
-    .json({ message: "An error occurred while fetching user notes", error });
+    .json({ message: "An error occurred while fetching the user's note.", error });
 }
 };
 
