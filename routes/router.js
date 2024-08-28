@@ -64,10 +64,10 @@ router.post(
 
 // get all notes of a user
 // router.get("/notes/user/all", jwt, noteController.getAllNotesOfAUserController);
-router.get("/notes/user/all", noteController.getAllNotesOfAUserController);
+router.get("/notes/user/all", jwt, noteController.getAllNotesOfAUserController);
 
 // get a note of a user
-router.get("/notes/user/:id", jwt, noteController.getANoteOfAUserController);
+router.get("/notes/user/:id", noteController.getANoteOfAUserController);
 
 // edit note of a user
 router.put(
