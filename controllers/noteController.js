@@ -75,8 +75,11 @@ exports.getAllNotesOfAUserController = async (req, res) => {
 
   const searchKey = req.query.search;
   console.log("searchKey: ", searchKey);
+  const userId = req.payload;
 
   const query = {
+    // Filter by a specific userId
+    userId: userId,
     noteTitle: {
       $regex: searchKey,
       $options: "i",
@@ -109,7 +112,7 @@ exports.getAllNotesOfAUserController = async (req, res) => {
     // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
     res
       .status(500)
-      .json({ message: "An error occurred while fetching user notes", error });
+      .json({ message: "An error occurred while fetching the user's notes", error });
   }
 };
 
