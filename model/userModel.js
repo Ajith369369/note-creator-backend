@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Static method to get the last note created by a specific user
-noteSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
+userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
   try {
     // Query to find all users with only _id (userId), username, and email
     /* find(): This method is used to query the database. The empty object {} inside find() means we are querying for all documents in the users collection (no filter is applied).
@@ -43,7 +43,7 @@ noteSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
     toArray(): Converts the result to an array.
     await: Ensures the query completes before continuing the execution.*/
     const projection = { _id: 1, username: 1, email: 1 };
-    const allUsers = await users.find({}, { projection }).toArray();
+    const allUsers = await this.find({}, { projection }).toArray();
     return allUsers
   } catch (error) {
     console.error("Error fetching id, username, and email of users:", error);

@@ -90,6 +90,9 @@ router.delete(
 // This middleware extracts the uploaded file from the request, processes it (e.g., stores it in a designated folder), and makes it accessible via req.file.
 // router.post('/upload', jwt, multer.single("noteImage"), noteController.uploadDefaultImageForNoteOfAUserController)
 
+// get data for admin dashboard
+router.get("/profile-home/admin", jwt, userController.adminDataController);
+
 // export module to backend
 // Exporting the router
 // This line exports the router object, making it available to be imported and used in the main application (index.js file). This allows the routes defined in this file to be integrated into the larger Express application.

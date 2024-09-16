@@ -21,7 +21,7 @@ const noteSchema = new mongoose.Schema({
   userId: {
     required: true,
     type: String,
-  }
+  },
 });
 
 // Static method to get the last note created by a specific user
@@ -30,9 +30,10 @@ noteSchema.statics.getLastNoteForUser = async function (userId) {
     // Find the most recent note for the given user, sorted by noteDate in descending order.
     // The sort({ noteDate: -1 }) ensures that it retrieves the latest note. noteDate is in a format where sorting by date works (i.e., ISO date strings).
     // select('noteDate'): Select only the noteDate field
-    const lastNote = await notes.findOne({ userId })
+    const lastNote = await this
+      .findOne({ userId })
       .sort({ noteDate: -1 })
-      .select('noteDate');
+      .select("noteDate");
 
     return lastNote ? lastNote.noteDate : null;
   } catch (error) {
