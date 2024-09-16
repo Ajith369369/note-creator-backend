@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken");
 const jwtMiddleware = (req, res, next) => {
   console.log("Inside jwt Middleware.");
-  console.log('req.headers: ', req.headers)
+  console.log("req.headers: ", req.headers);
 
   // Token from request header
   // in req.headers, it is "authorization" instead of "Authorization"
@@ -13,18 +13,21 @@ const jwtMiddleware = (req, res, next) => {
   // Verify token
   try {
     const jwtResponse = jwt.verify(token, "ultimatesupersecretkey");
-    console.log('jwtResponse: ', jwtResponse)
-    
+    console.log("jwtResponse: ", jwtResponse);
+
     req.payload = jwtResponse.userId;
-    console.log('jwtResponse.userId: ', jwtResponse.userId)
+    console.log("jwtResponse.userId: ", jwtResponse.userId);
 
     // Time at which token is generated
-    console.log('jwtResponse.iat (Time at which token is generated): ', jwtResponse.iat)
+    console.log(
+      "jwtResponse.iat (Time at which token is generated): ",
+      jwtResponse.iat
+    );
 
     // res.status(200).json("Authorization successful.");
     next();
   } catch (error) {
-    res.status(401).json( `Authorization failed: ${error}`)
+    res.status(401).json(`Authorization failed: ${error}`);
   }
 };
 

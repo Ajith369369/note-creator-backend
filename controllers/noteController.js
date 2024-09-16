@@ -15,7 +15,7 @@ exports.addNoteOfAUserController = async (req, res) => {
   console.log("req.file: ", req.file);
   console.log("req.file.filename: ", req.file.filename);
 
-  const noteImage = req.file.filename
+  const noteImage = req.file.filename;
   console.log("noteImage: ", noteImage);
 
   // res.status(200).json("Request received.");
@@ -72,7 +72,6 @@ exports.getAllNotesOfAllUsersController = async (req, res) => {
 
 // get all notes of a user
 exports.getAllNotesOfAUserController = async (req, res) => {
-
   const searchKey = req.query.search;
   console.log("searchKey: ", searchKey);
   const userId = req.payload;
@@ -87,7 +86,6 @@ exports.getAllNotesOfAUserController = async (req, res) => {
   };
 
   try {
-
     const allUserNote = await notes.find(query);
     res.status(200).json(allUserNote);
 
@@ -103,7 +101,6 @@ exports.getAllNotesOfAUserController = async (req, res) => {
     //
     // const userNotes = await notes.find({ userId });
     // res.status(200).json(userNotes);
-
   } catch (error) {
     // res.status(500): Sets the HTTP status code of the response to 500 Internal Server Error for unexpected issues.
     // 500 Status Code: This status code stands for "Internal Server Error," indicating that an error occurred on the server side that prevented it from fulfilling the request.
@@ -112,7 +109,10 @@ exports.getAllNotesOfAUserController = async (req, res) => {
     // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
     res
       .status(500)
-      .json({ message: "An error occurred while fetching the user's notes", error });
+      .json({
+        message: "An error occurred while fetching the user's notes",
+        error,
+      });
   }
 };
 
@@ -120,33 +120,35 @@ exports.getAllNotesOfAUserController = async (req, res) => {
 exports.getANoteOfAUserController = async (req, res) => {
   console.log("Inside getANoteOfAUserController()");
   const { id } = req.params;
-try {
-  const aUserNote = await notes.find({ _id: id });
-  res.status(200).json(aUserNote);
+  try {
+    const aUserNote = await notes.find({ _id: id });
+    res.status(200).json(aUserNote);
 
-  // userId is the identifier for the user whose notes you want to retrieve.
-  //
-  // const userId = req.payload;
+    // userId is the identifier for the user whose notes you want to retrieve.
+    //
+    // const userId = req.payload;
 
-  // notes is a Mongoose model representing the notes collection in the MongoDB database.
-  // notes.find({ userId }): Filters the notes by userId to fetch only those notes that belong to the specified user.
-  // res.status(200): Sets the HTTP status code of the response to 200 OK, indicating that the request was successful.
-  // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
-  // .json(userNotes): Sends the userNotes data as a JSON response to the client.
-  //
-  // const userNotes = await notes.find({ userId });
-  // res.status(200).json(userNotes);
-
-} catch (error) {
-  // res.status(500): Sets the HTTP status code of the response to 500 Internal Server Error for unexpected issues.
-  // 500 Status Code: This status code stands for "Internal Server Error," indicating that an error occurred on the server side that prevented it from fulfilling the request.
-  // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
-  // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
-  // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
-  res
-    .status(500)
-    .json({ message: "An error occurred while fetching the user's note.", error });
-}
+    // notes is a Mongoose model representing the notes collection in the MongoDB database.
+    // notes.find({ userId }): Filters the notes by userId to fetch only those notes that belong to the specified user.
+    // res.status(200): Sets the HTTP status code of the response to 200 OK, indicating that the request was successful.
+    // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
+    // .json(userNotes): Sends the userNotes data as a JSON response to the client.
+    //
+    // const userNotes = await notes.find({ userId });
+    // res.status(200).json(userNotes);
+  } catch (error) {
+    // res.status(500): Sets the HTTP status code of the response to 500 Internal Server Error for unexpected issues.
+    // 500 Status Code: This status code stands for "Internal Server Error," indicating that an error occurred on the server side that prevented it from fulfilling the request.
+    // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
+    // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
+    // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
+    res
+      .status(500)
+      .json({
+        message: "An error occurred while fetching the user's note.",
+        error,
+      });
+  }
 };
 
 //edit note of a user
