@@ -1,4 +1,5 @@
 const users = require("../model/userModel");
+const notes = require("../model/noteModel");
 const jwt = require("jsonwebtoken");
 
 // register
@@ -139,48 +140,27 @@ exports.loginController = async (req, res) => {
 };
 
 exports.adminDataController = async (req, res) => {
-  // Collection name
-  // const users = database.collection("users");
   try {
-    // Query to find all users with only _id (userId), username, and email
-    /* find(): This method is used to query the database. The empty object {} inside find() means we are querying for all documents in the users collection (no filter is applied).
-    
-    {}, { projection }:
-      First Argument ({}): This is the filter argument. Since it is an empty object, it means no specific filter is applied and all documents will be returned.
-      Second Argument ({ projection }): This specifies the fields that should be included or excluded in the result. In this case, projection is defined as { _id: 1, username: 1, email: 1 }, meaning:
-        _id: 1: Include the _id field (also known as userId).
-        username: 1: Include the username field.
-        email: 1: Include the email field.
-        
-    So, only these three fields will be included in the result for each user document.
-    
-    toArray(): This converts the query result (which is a cursor) into an array of documents. In MongoDB, queries typically return a cursor, which allows for streaming large datasets. .toArray() gathers all the documents into an array, which is easier to work with.
-    
-    await: Since find() is asynchronous (it involves querying the database), we use await to ensure the program waits for the query to complete before proceeding.
-    
-    find(): Queries the database.
-    projection: Selects which fields to return (_id, username, email).
-    toArray(): Converts the result to an array.
-    await: Ensures the query completes before continuing the execution.*/
-    const projection = { _id: 1, username: 1, email: 1 };
-    const allUsers = await users.find({}, { projection }).toArray();
+    // Fetch all users
+    const allUsers = await users.getIdUsernameEmailOfAllUsers();
+    console.log("allUsers before adding last date: ", allUsers);
 
-    // Loop through each user to find their last note's date
+    // For each user, fetch their latest note date.
+    // Loop through each user to find their last note's date.
     const usersWithLastNoteDate = await Promise.all(
       allUsers.map(async (user) => {
         // Find the latest note created by this user
-        const lastNote = await notesCollection.findOne(
-          { userId: user._id }, // Assuming there's a userId field in the notes collection to match notes with users
-          { sort: { createdAt: -1 }, projection: { createdAt: 1 } } // Sort by 'createdAt' in descending order, pick the latest one
-        );
+        const lastNote = await notes.getLastNoteForUser();
 
         // Add the last note's date to the user object
         return {
           ...user,
-          lastNoteDate: lastNote ? lastNote.createdAt : "No notes found", // If no notes, return a message
+          lastNoteDate: lastNote ? lastNote.noteDate : null,
         };
       })
     );
+    console.log("usersWithLastNoteDate: ", usersWithLastNoteDate);
+    console.log("allUsers: ", allUsers);
     res.status(200).json({ allUsers });
   } catch (error) {
     res.status(401).json(error);
