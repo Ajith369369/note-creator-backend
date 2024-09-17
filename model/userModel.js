@@ -19,36 +19,25 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Static method to get the last note created by a specific user
+// Static method to get all users with specific fields (userId, username, email)
+// This defines a static method on the Mongoose schema. Static methods can be called directly on the model, rather than on individual instances of the model.
 userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
   try {
-    // Query to find all users with only _id (userId), username, and email
-    /* find(): This method is used to query the database. The empty object {} inside find() means we are querying for all documents in the users collection (no filter is applied).
-    
-    {}, { projection }:
-      First Argument ({}): This is the filter argument. Since it is an empty object, it means no specific filter is applied and all documents will be returned.
-      Second Argument ({ projection }): This specifies the fields that should be included or excluded in the result. In this case, projection is defined as { _id: 1, username: 1, email: 1 }, meaning:
-        _id: 1: Include the _id field (also known as userId).
-        username: 1: Include the username field.
-        email: 1: Include the email field.
-        
-    So, only these three fields will be included in the result for each user document.
-    
-    toArray(): This converts the query result (which is a cursor) into an array of documents. In MongoDB, queries typically return a cursor, which allows for streaming large datasets. .toArray() gathers all the documents into an array, which is easier to work with.
-    
-    await: Since find() is asynchronous (it involves querying the database), we use await to ensure the program waits for the query to complete before proceeding.
-    
-    find(): Queries the database.
-    projection: Selects which fields to return (_id, username, email).
-    toArray(): Converts the result to an array.
-    await: Ensures the query completes before continuing the execution.*/
-    const projection = { _id: 1, username: 1, email: 1 };
-    const allUsers = await this.find({}, { projection }).toArray();
+    // Query to find all users with only _id (userId), username, and email.
+    // find(): This is a Mongoose method that retrieves data from MongoDB based on the query parameters.
+    // find({}): The empty object {} as the first argument means we are not specifying any filters — we want to retrieve all documents from the users collection.
+    // "_id username email": The second argument is the projection, which specifies the fields we want to include in the result (_id, username, and email). Other fields in the document will be excluded.
+    // The Mongoose way to specify a projection is using `.select()`
+    // .lean() returns plain JS objects. This converts the Mongoose documents into plain JavaScript objects, without attaching Mongoose-specific functions (like .save() or .validate()).
+    // await: This makes sure the code waits until the database query is complete before continuing. The function is asynchronous, meaning it doesn't block the rest of the program, but this specific line will wait for the query to resolve.
+    const allUsers = await this.find({}, "_id username email").lean(); 
     return allUsers
   } catch (error) {
     console.error("Error fetching id, username, and email of users:", error);
 
     // Re-throw the error to be handled by the calling function, to ensure that the controller can handle it properly.
+    // This rethrows the error after logging it, allowing the calling code to handle the error appropriately (e.g., showing an error message to the user or retrying the operation).
+    // Ensures that errors don't silently fail, allowing them to propagate to where the function is called, so the calling code can handle them properly.
     throw error;
   }
 };

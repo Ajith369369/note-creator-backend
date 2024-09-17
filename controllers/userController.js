@@ -140,6 +140,12 @@ exports.loginController = async (req, res) => {
 };
 
 exports.adminDataController = async (req, res) => {
+  console.log("Inside adminDataController.");
+
+  // Look for payload coming from jwtMiddleware.js
+  const userId = req.payload;
+  console.log("userId from payload coming from jwtMiddleware.js: ", userId);
+
   try {
     // Fetch all users
     const allUsers = await users.getIdUsernameEmailOfAllUsers();
@@ -150,7 +156,7 @@ exports.adminDataController = async (req, res) => {
     const usersWithLastNoteDate = await Promise.all(
       allUsers.map(async (user) => {
         // Find the latest note created by this user
-        const lastNote = await notes.getLastNoteForUser();
+        const lastNote = await notes.getLastNoteForUser(user._id);
 
         // Add the last note's date to the user object
         return {
