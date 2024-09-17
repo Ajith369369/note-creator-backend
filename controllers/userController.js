@@ -157,11 +157,16 @@ exports.adminDataController = async (req, res) => {
       allUsers.map(async (user) => {
         // Find the latest note created by this user
         const lastNote = await notes.getLastNoteForUser(user._id);
-        console.log("lastNote inside adminDataController: ", lastNote);
+        console.log("lastNote: ", lastNote);
+
+        // Find the total number of notes created by this user
+        const notesNumber = await notes.getTotalNotesOfAUser(user._id);
+        console.log('notesNumber: ', notesNumber)
         // Add the last note's date to the user object
         return {
           ...user,
-          last_active_date: lastNote ? lastNote : null,
+          notes_number: notesNumber ? notesNumber : null,
+          last_active_date: lastNote ? lastNote : null
         };
       })
     );

@@ -43,6 +43,17 @@ noteSchema.statics.getLastNoteForUser = async function (userId) {
   }
 };
 
+// Static method to count notes for a user
+noteSchema.statics.getTotalNotesOfAUser = async function (userId) {
+  try {
+    const totalNotes = await this.countDocuments({ userId });
+    return totalNotes;
+  } catch (error) {
+    console.error("Error counting notes:", error);
+    throw error;
+  }
+};
+
 const notes = mongoose.model("note", noteSchema);
 
 module.exports = notes;
