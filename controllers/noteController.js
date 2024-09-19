@@ -153,10 +153,12 @@ exports.getANoteOfAUserController = async (req, res) => {
   }
 };
 
-//edit note of a user
-// To update an existing note in the MongoDB database with new information provided in the request.
-// This exports the editNoteOfAUserController function so it can be used as a route handler in the Express application.
-// async (req, res): Defines an asynchronous function that handles the request (req) and response (res) objects. Asynchronous functions are used to handle operations that involve promises, such as database queries.
+/**
+ * Edit note of a user.
+ * To update an existing note in the MongoDB database with new information provided in the request.
+ * This exports the editNoteOfAUserController function so it can be used as a route handler in the Express application.
+ * async (req, res): Defines an asynchronous function that handles the request (req) and response (res) objects. Asynchronous functions are used to handle operations that involve promises, such as database queries.
+ */
 exports.editNoteOfAUserController = async (req, res) => {
   // req.params: Contains route parameters (e.g., /notes/:id).
   // id: Extracts the note ID from the request parameters, which is used to find and update the specific note.
@@ -261,10 +263,12 @@ exports.deleteNoteOfAUserController = async (req, res) => {
       }
     });
 
-    // Delete the note from the database.
-    // notes.findByIdAndDelete(...): Mongoose method that finds a document by its ID and deletes it.
-    // { _id: id }: The query to find the note by its _id (which is the ID extracted from the request parameters).
-    // await is used to pause the execution until the findByIdAndDelete operation is complete, allowing the code to wait for the promise to resolve and get the result.
+    /**
+     * Delete the note from the database.
+     * notes.findByIdAndDelete(...): Mongoose method that finds a document by its ID and deletes it.
+     * { _id: id }: The query to find the note by its _id (which is the ID extracted from the request parameters).
+     * await is used to pause the execution until the findByIdAndDelete operation is complete, allowing the code to wait for the promise to resolve and get the result.
+     */
     await notes.findByIdAndDelete({ _id: id });
 
     // res.status(200): Sets the HTTP status code to 200 OK, indicating that the request was successful.
@@ -273,10 +277,13 @@ exports.deleteNoteOfAUserController = async (req, res) => {
       .status(200)
       .json({ message: "Note and image were deleted successfully. Deleted note: ", deleteNote });
   } catch (err) {
-    // res.status(500).json(error);: Sets the HTTP status code to 500 Internal Server Error and sends the error details in the response. This informs the client that something went wrong on the server.
-    // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
-    // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
-    // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
+
+    /**
+     * res.status(500).json(error);: Sets the HTTP status code to 500 Internal Server Error and sends the error details in the response. This informs the client that something went wrong on the server.
+     * json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
+     * message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
+     * error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
+     */
     res.status(500).json({
       message: "An error occurred while deleting the user's note and image:",
       error: err,
@@ -284,26 +291,33 @@ exports.deleteNoteOfAUserController = async (req, res) => {
   }
 };
 
-/* // (req, res): These are the request and response objects provided by Express. req contains the incoming request data, and res is used to send a response back to the client.
-// req: The request object containing details of the incoming request, including any data sent with it (such as the uploaded file).
-// res: The response object used to send back a response to the client.
-exports.uploadDefaultImageForNoteOfAUserController = async (req, res) => {
+/**
+ * (req, res): These are the request and response objects provided by Express. req contains the incoming request data, and res is used to send a response back to the client.
+ * req: The request object containing details of the incoming request, including any data sent with it (such as the uploaded file).
+ * res: The response object used to send back a response to the client.
+ */
+
+/*exports.uploadDefaultImageForNoteOfAUserController = async (req, res) => {
 
   // This block is used for error handling. The try block contains the code that might throw an error, and if an error occurs, the catch block will execute.
   // This ensures that even if something goes wrong, the server can handle the situation gracefully and return a meaningful error message.
   try {
 
-    // This line sends a JSON response back to the client.
-    // req.file.filename: multer stores the uploaded file on the server, and filename is the name of the file on the server. By default, multer generates a unique filename to prevent collisions.
-    // filePath: `/uploads/${req.file.filename}: This constructs the file path where the uploaded image is stored on the server. This path is relative to the public directory from which the file can be served.
-    // The client receives this filePath in the response, which it can then use to display the image or store the path in a database.
+    /~*
+     * This line sends a JSON response back to the client.
+     * req.file.filename: multer stores the uploaded file on the server, and filename is the name of the file on the server. By default, multer generates a unique filename to prevent collisions.
+     * filePath: `/uploads/${req.file.filename}: This constructs the file path where the uploaded image is stored on the server. This path is relative to the public directory from which the file can be served.
+     * The client receives this filePath in the response, which it can then use to display the image or store the path in a database.
+     ~/
     res.json({ filePath: `/uploads/${req.file.filename}` });
 
     // If any error occurs during the file upload process (e.g., if the file can't be saved or the server has issues), the catch block is executed.
   } catch (error) {
 
-    // res.status(500): This sets the HTTP status code to 500, indicating an internal server error.
-    // json({ message: "File upload failed", error }): This sends a JSON response back to the client with an error message and the error object, providing details about what went wrong.
+    /~*
+     * res.status(500): This sets the HTTP status code to 500, indicating an internal server error.
+     * json({ message: "File upload failed", error }): This sends a JSON response back to the client with an error message and the error object, providing details about what went wrong.
+     ~/
     res.status(500).json({ message: "File upload failed.", error });
   }
-} */
+}*/
