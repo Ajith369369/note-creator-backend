@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const notes = require("../model/noteModel");
 
 exports.addNoteOfAUserController = async (req, res) => {
@@ -107,12 +110,10 @@ exports.getAllNotesOfAUserController = async (req, res) => {
     // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
     // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
     // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while fetching the user's notes",
-        error,
-      });
+    res.status(500).json({
+      message: "An error occurred while fetching the user's notes",
+      error,
+    });
   }
 };
 
@@ -142,12 +143,10 @@ exports.getANoteOfAUserController = async (req, res) => {
     // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
     // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
     // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while fetching the user's note.",
-        error,
-      });
+    res.status(500).json({
+      message: "An error occurred while fetching the user's note.",
+      error,
+    });
   }
 };
 
@@ -221,22 +220,47 @@ exports.deleteNoteOfAUserController = async (req, res) => {
   // const { id } = req.params;: Extracts the id parameter from the request. This ID represents the note to be deleted.
   const { id } = req.params;
   try {
+    const deleteNote = await notes.findById(id);
+
+    if (!deleteNote) {
+      return res.status(404).json({ message: "Note not found." });
+    }
+
+    const imagePath = path.join(
+      __dirname,
+      "..",
+      "uploads",
+      deleteNote.noteImage
+    );
+
+    // Delete the image from the uploads folder
+    fs.unlink(imagePath, (err) => {
+      if (err) {
+        console.error("Error while deleting the image file: ", err);
+      } else {
+        console.log("Successfully deleted the image file.");
+      }
+    });
+
+    // Delete the note from the database.
     // notes.findByIdAndDelete(...): Mongoose method that finds a document by its ID and deletes it.
     // { _id: id }: The query to find the note by its _id (which is the ID extracted from the request parameters).
     // await is used to pause the execution until the findByIdAndDelete operation is complete, allowing the code to wait for the promise to resolve and get the result.
-    const deleteNote = await notes.findByIdAndDelete({ _id: id });
+    await notes.findByIdAndDelete({ _id: id });
 
     // res.status(200): Sets the HTTP status code to 200 OK, indicating that the request was successful.
     // .json(deleteNote): Sends the deleted note as a JSON response to the client. This allows the client to see which note was deleted.
-    res.status(200).json(deleteNote);
+    res
+      .status(200)
+      .json({ message: "Note and image were deleted successfully. Deleted note: ", deleteNote });
   } catch (err) {
     // res.status(500).json(error);: Sets the HTTP status code to 500 Internal Server Error and sends the error details in the response. This informs the client that something went wrong on the server.
     // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
     // message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
     // error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
     res.status(500).json({
-      message: "An error occurred while deleting the user's note :",
-      error,
+      message: "An error occurred while deleting the user's note and image:",
+      error: err,
     });
   }
 };

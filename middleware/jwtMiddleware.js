@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken");
 const jwtMiddleware = (req, res, next) => {
   console.log("Inside jwt Middleware.");
-  console.log("req.headers: ", req.headers);
+  // console.log("req.headers: ", req.headers);
 
   // Token from request header
   // in req.headers, it is "authorization" instead of "Authorization"
