@@ -1,4 +1,7 @@
+// fs: The file system module from Node.js is used to interact with the file system. It allows you to read, write, delete, and manipulate files.
 const fs = require("fs");
+
+// path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
 const path = require("path");
 
 const notes = require("../model/noteModel");
@@ -212,9 +215,12 @@ exports.editNoteOfAUserController = async (req, res) => {
   }
 };
 
-//delete note of a user
-// exports.deleteNoteOfAUserController: This exports the deleteNoteOfAUserController function so it can be used as a route handler in the Express application.
-// async (req, res): Defines an asynchronous function that handles the incoming request (req) and sends a response (res). Asynchronous functions are used to handle operations that involve promises, such as database queries.
+/**
+ * Delete note of a user.
+ * This function ensures that both the note and its associated image are deleted.
+ * exports.deleteNoteOfAUserController: This exports the deleteNoteOfAUserController function so it can be used as a route handler in the Express application.
+ * async (req, res): Defines an asynchronous function that handles the incoming request (req) and sends a response (res). Asynchronous functions are used to handle operations that involve promises, such as database queries.
+ */
 exports.deleteNoteOfAUserController = async (req, res) => {
   // req.params: Contains route parameters (e.g., /notes/:id).
   // const { id } = req.params;: Extracts the id parameter from the request. This ID represents the note to be deleted.
@@ -222,10 +228,19 @@ exports.deleteNoteOfAUserController = async (req, res) => {
   try {
     const deleteNote = await notes.findById(id);
 
+    // If the note doesn't exist (i.e., note is null), a 404 Not Found status is returned along with a JSON message indicating that the note was not found.
     if (!deleteNote) {
       return res.status(404).json({ message: "Note not found." });
     }
 
+    /**
+     * Constructing the image file path
+     * path.join(): This constructs the full path to the image file associated with the note.
+     * __dirname: Refers to the current directory (where this code resides).
+     * '..': Moves up one level in the directory structure (to the parent folder).
+     * 'uploads': Points to the "uploads" folder where the image files are stored.
+     * note.noteImage: The image filename stored in the note document in the database. The noteImage field contains just the filename, not the full path.
+     */
     const imagePath = path.join(
       __dirname,
       "..",
@@ -233,7 +248,11 @@ exports.deleteNoteOfAUserController = async (req, res) => {
       deleteNote.noteImage
     );
 
-    // Delete the image from the uploads folder
+    /**
+     * Deleting the image from the file system (uploads folder)
+     * fs.unlink(): Deletes the image file from the file system. It takes the imagePath as the first argument and a callback function as the second argument.
+     * err: If an error occurs during deletion (e.g., the file doesn't exist), it's handled inside the callback, where it logs the error to the console.
+     */
     fs.unlink(imagePath, (err) => {
       if (err) {
         console.error("Error while deleting the image file: ", err);
