@@ -93,6 +93,17 @@ router.delete(
 // get data for admin dashboard
 router.get("/profile-home/admin", jwt, userController.adminDataController);
 
+// #region Multi-line Comment
+/**
+ * delete user and all his notes.
+ */
+// #endregion
+router.delete(
+  "/user/delete/:id",
+  jwt,
+  userController.deleteUserController
+);
+
 // export module to backend
 // Exporting the router
 // This line exports the router object, making it available to be imported and used in the main application (index.js file). This allows the routes defined in this file to be integrated into the larger Express application.
