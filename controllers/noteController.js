@@ -224,17 +224,26 @@ exports.editNoteOfAUserController = async (req, res) => {
  * async (req, res): Defines an asynchronous function that handles the incoming request (req) and sends a response (res). Asynchronous functions are used to handle operations that involve promises, such as database queries.
  */
 exports.deleteNoteOfAUserController = async (req, res) => {
-  // req.params: Contains route parameters (e.g., /notes/:id).
-  // const { id } = req.params;: Extracts the id parameter from the request. This ID represents the note to be deleted.
+  // #region Multi-line Comment
+  /**
+   * req.params: Contains route parameters (e.g., /notes/:id).
+   * const { id } = req.params;: Extracts the id parameter from the request. This ID represents the note to be deleted.
+   */
+  // #endregion
   const { id } = req.params;
   try {
     const deleteNote = await notes.findById(id);
 
-    // If the note doesn't exist (i.e., note is null), a 404 Not Found status is returned along with a JSON message indicating that the note was not found.
+    // #region Multi-line Comment
+    /**
+     * If the note doesn't exist (i.e., note is null), a 404 Not Found status is returned along with a JSON message indicating that the note was not found.
+     */
+    // #endregion
     if (!deleteNote) {
       return res.status(404).json({ message: "Note not found." });
     }
 
+    // #region Multi-line Comment
     /**
      * Constructing the image file path
      * path.join(): This constructs the full path to the image file associated with the note.
@@ -243,6 +252,7 @@ exports.deleteNoteOfAUserController = async (req, res) => {
      * 'uploads': Points to the "uploads" folder where the image files are stored.
      * note.noteImage: The image filename stored in the note document in the database. The noteImage field contains just the filename, not the full path.
      */
+    // #endregion
     const imagePath = path.join(
       __dirname,
       "..",
@@ -250,11 +260,13 @@ exports.deleteNoteOfAUserController = async (req, res) => {
       deleteNote.noteImage
     );
 
+    // #region Multi-line Comment
     /**
      * Deleting the image from the file system (uploads folder)
      * fs.unlink(): Deletes the image file from the file system. It takes the imagePath as the first argument and a callback function as the second argument.
      * err: If an error occurs during deletion (e.g., the file doesn't exist), it's handled inside the callback, where it logs the error to the console.
      */
+    // #endregion
     fs.unlink(imagePath, (err) => {
       if (err) {
         console.error("Error while deleting the image file: ", err);
@@ -262,28 +274,37 @@ exports.deleteNoteOfAUserController = async (req, res) => {
         console.log("Successfully deleted the image file.");
       }
     });
-
+    // #region Multi-line Comment
     /**
      * Delete the note from the database.
      * notes.findByIdAndDelete(...): Mongoose method that finds a document by its ID and deletes it.
      * { _id: id }: The query to find the note by its _id (which is the ID extracted from the request parameters).
      * await is used to pause the execution until the findByIdAndDelete operation is complete, allowing the code to wait for the promise to resolve and get the result.
      */
+    // #endregion
     await notes.findByIdAndDelete({ _id: id });
 
-    // res.status(200): Sets the HTTP status code to 200 OK, indicating that the request was successful.
-    // .json(deleteNote): Sends the deleted note as a JSON response to the client. This allows the client to see which note was deleted.
+    // #region Multi-line Comment
+    /**
+     * res.status(200): Sets the HTTP status code to 200 OK, indicating that the request was successful.
+     * .json(deleteNote): Sends the deleted note as a JSON response to the client. This allows the client to see which note was deleted.
+     */
+    // #endregion
     res
       .status(200)
-      .json({ message: "Note and image were deleted successfully. Deleted note: ", deleteNote });
+      .json({
+        message: "Note and image were deleted successfully. Deleted note: ",
+        deleteNote,
+      });
   } catch (err) {
-
+    // #region Multi-line Comment
     /**
      * res.status(500).json(error);: Sets the HTTP status code to 500 Internal Server Error and sends the error details in the response. This informs the client that something went wrong on the server.
      * json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
      * message: A human-readable message describing the nature of the error. It provides context to the client about what went wrong.
      * error: The actual error object caught in the catch block. This typically contains more detailed information about the error, which can be useful for debugging.
      */
+    // #endregion
     res.status(500).json({
       message: "An error occurred while deleting the user's note and image:",
       error: err,

@@ -1,5 +1,8 @@
 // import mongoose
 const mongoose = require("mongoose");
+ 
+// import noteModel
+const notes = require("../model/noteModel");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -42,9 +45,79 @@ userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
   }
 };
 
-// model("users", userSchema), "users" collection from MongoDB Atlas
-// Creates a model based on the userSchema and links it to the users collection in MongoDB.
+/**
+ * Business logic is isolated; model handles the data access logic.
+ *  Static methods are called directly on the model (User) rather than on instances of the model.
+ * userId is passed as a parameter to identify which user to delete.
+ * Transactions: This code uses MongoDB transactions, which ensure that both the deletion of the user and their notes either both succeed or both fail. This ensures data integrity.
+ * Error Handling: If anything goes wrong, the transaction is rolled back, and an error is thrown to be handled by the calling function.
+ * Session: All database operations are performed within the context of a session. This ensures that the operations can be committed or rolled back as a unit.
+ */
+userSchema.statics.deleteUserAndNotes = async (userId) => {
+  /**
+   * Start a new database transaction for the session (MongoDB session).
+   * This ensures that any changes made during this session are grouped together. If one operation fails, the transaction can be rolled back to undo all changes.
+   */
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    /**
+     * Try to find and delete the user by ID within the session.
+     * If the user doesn't exist, abort the transaction and return null.
+     * The .session(session) ensures that this operation is part of the ongoing transaction, so it can be committed or rolled back as needed.
+     */
+    const user = await this.findByIdAndDelete(userId).session(session);
+    if (!user) {
+      await session.abortTransaction();
+      return null;
+    }
+    // #region Multi-line Comment
+    /**
+     * Delete all notes associated with the user (notes having the same userId) within the same session.
+     * The .session(session) ensures that this operation is part of the ongoing transaction, so it can be committed or rolled back as needed.
+     * If both operations (i.e., deleting the user and their notes) succeed, commit the transaction.
+     * If everything is successful, true is returned to indicate that the user and their notes were deleted.
+     */
+    // #endregion
+    await notes.deleteMany({ userId }).session(session);
+    await session.commitTransaction();
+    return true;
+  } catch (error) {
+    // #region Multi-line Comment
+    /**
+     * If an error occurs at any point, rollback the transaction. If an error occurs, the transaction is aborted, which means any changes made in the session (user or note deletions) are rolled back.
+     * Rethrow the error to handle it outside. After aborting the transaction, the error is re-thrown so it can be handled by whatever function called this static method.
+     */
+    // #endregion
+    await session.abortTransaction();
+    throw error;
+  } 
+  // #region Multi-line Comment
+  /**
+   * The finally block runs after the try or catch block, regardless of whether the operation succeeded or failed.
+   */
+  // #endregion
+  finally {
+    /**
+     * Whether successful or failed, always end the session to release resources.
+     * This ends the MongoDB session, releasing resources. This is necessary to avoid memory leaks or keeping a session open longer than needed.
+     */
+    session.endSession();
+  }
+};
+
+// #region Multi-line Comment
+/**
+ * model("users", userSchema), "users" collection from MongoDB Atlas.
+ * Creates a model based on the userSchema and links it to the users collection in MongoDB.
+ */
+// #endregion
 const users = mongoose.model("users", userSchema);
 
-// Makes this model available for import in other files, allowing you to perform database operations on the users collection.
+// #region Multi-line Comment
+/**
+ * Makes this model available for import in other files, allowing you to perform database operations on the users collection.
+ */
+// #endregion
 module.exports = users;

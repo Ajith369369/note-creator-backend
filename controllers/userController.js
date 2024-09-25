@@ -176,3 +176,19 @@ exports.adminDataController = async (req, res) => {
     res.status(401).json(error);
   }
 };
+
+exports.deleteUserController = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const result = await users.deleteUserAndNotes(userId);
+
+    if (!result) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ message: "User and associated notes deleted successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error });
+  }
+};
+
