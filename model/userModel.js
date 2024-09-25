@@ -85,10 +85,26 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
     // #region Multi-line Comment
     /**
      * Fetch all note IDs of the user from the 'notes' collection.
+     * 
+     * Query: const allNoteIdsOfNotesOfAUser = await notes.find({}, "_id").lean().session(session);
+     * This query retrieves only the _id fields of all the notes in the collection.
+     * notes.find({}, "_id"): This finds all notes in the collection (no specific userId filter is applied, meaning it will retrieve notes for all users), and only the _id field of each document is returned. The second argument ("_id") is called the projection, which limits the fields returned in the result. In this case, only the _id field is returned, not the entire note.
+     * This returns an array of objects where each object only contains the _id field of each note, but it fetches notes of all users, not just a specific one.
+     * 
+     * Query: const allNotesOfUser = await Note.find({ userId }).lean().session(session);
+     * This query is used to find all notes created by a specific user based on the userId.
+     * Note.find({ userId }): Finds all notes in the notes collection where the userId matches the provided value. This retrieves the entire note objects that match the query.
+     * 
+     * Query: const allNoteIdsOfNotesOfAUser = await notes.find({ userId }, "_id").lean().session(session);
+     * notes.find({ userId }, "_id"): The find method is querying the notes collection for documents where the userId field matches the provided userId. It fetches all the notes created by this specific user.
+     * "_id": This is the projection, which means that only the _id field of each document is returned, rather than the entire note object (which typically includes noteTitle, noteContent, noteDate, etc.). The result is a list of objects containing only the _id field of each note.
+     * 
+     * .lean(): Returns plain JavaScript objects instead of Mongoose documents, which makes querying more efficient. It also removes Mongoose's built-in methods like .save() and .validate().
+     * .session(session): Associates this query with a MongoDB transaction session to ensure that all database operations within this session are part of the same transaction (used in multi-step operations).
      */
     // #endregion
     const allNoteIdsOfNotesOfAUser = await notes
-      .find({}, "_id")
+      .find({userId}, "_id")
       .lean()
       .session(session);
     console.log("allNoteIdsOfNotesOfAUser: ", allNoteIdsOfNotesOfAUser);
