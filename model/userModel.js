@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const notes = require("../model/noteModel");
 
 // import deleteImageFile
-const { deleteImageFile } = require('../utils/fileUtils');
+const { deleteImageFile } = require("../utils/fileUtils");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -61,32 +61,60 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
    * Start a new database transaction for the session (MongoDB session).
    * This ensures that any changes made during this session are grouped together. If one operation fails, the transaction can be rolled back to undo all changes.
    */
+  console.log("Inside deleteUserAndNotes().");
+
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+    console.log('Inside "try".');
     /**
      * Try to find and delete the user by ID within the session.
      * If the user doesn't exist, abort the transaction and return null.
      * The .session(session) ensures that this operation is part of the ongoing transaction, so it can be committed or rolled back as needed.
      */
-    const user = await this.findByIdAndDelete(userId).session(session);
+    const user = await users.findByIdAndDelete(userId).session(session);
+    console.log("user: ", user);
     if (!user) {
       await session.abortTransaction();
+      console.log("User not found, transaction aborted.");
       return null;
     }
+    console.log("After !user check, fetching all note IDs of the user.");
 
-    const allNoteIdsOfNotesOfAUser = await this.find({}, "_id")
+    // #region Multi-line Comment
+    /**
+     * Fetch all note IDs of the user from the 'notes' collection.
+     */
+    // #endregion
+    const allNoteIdsOfNotesOfAUser = await notes
+      .find({}, "_id")
       .lean()
       .session(session);
+    console.log("allNoteIdsOfNotesOfAUser: ", allNoteIdsOfNotesOfAUser);
+
+    // #region Multi-line Comment
+    /**
+     * Delete all associated notes and their images.
+     */
+    // #endregion
     await Promise.all(
       allNoteIdsOfNotesOfAUser.map(async (noteId) => {
         const deleteNote = await notes.findById(noteId).session(session);
 
         if (!deleteNote) {
-          return res.status(404).json({ message: "Note not found." });
+          console.error("Note not found.");
+          throw new Error("Note not found.");
         } else {
-          await deleteImageFile(deleteNote.noteImage).session(session);
+          console.log("Deleting note image: ", deleteNote.noteImage);
+          // #region Multi-line Comment
+          /**
+           * No need to pass the session to deleteImageFile() (since it's not interacting with DB).
+           * Ensure deleteImageFile() is called without .session(session) since it does not interact with the database.
+           * No session needed for file system.
+           */
+          // #endregion
+          await deleteImageFile(deleteNote.noteImage)
         }
       })
     );
@@ -100,6 +128,8 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
      */
     // #endregion
     await notes.deleteMany({ userId }).session(session);
+
+    console.log("Notes deleted, committing transaction.");
     await session.commitTransaction();
     return true;
   } catch (error) {
@@ -109,19 +139,21 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
      * Rethrow the error to handle it outside. After aborting the transaction, the error is re-thrown so it can be handled by whatever function called this static method.
      */
     // #endregion
+    console.error("Error occurred, aborting transaction:", error);
     await session.abortTransaction();
     throw error;
   } finally {
     // #region Multi-line Comment
     /**
      * The finally block runs after the try or catch block, regardless of whether the operation succeeded or failed.
-     */
-    // #endregion
-    /**
+     *
      * Whether successful or failed, always end the session to release resources.
+     *
      * This ends the MongoDB session, releasing resources. This is necessary to avoid memory leaks or keeping a session open longer than needed.
      */
+    // #endregion
     session.endSession();
+    console.log("Session ended.");
   }
 };
 
