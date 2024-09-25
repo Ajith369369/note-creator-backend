@@ -1,8 +1,11 @@
 // import mongoose
 const mongoose = require("mongoose");
- 
+
 // import noteModel
 const notes = require("../model/noteModel");
+
+// import deleteImageFile
+const { deleteImageFile } = require('../utils/fileUtils');
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -33,8 +36,8 @@ userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
     // The Mongoose way to specify a projection is using `.select()`
     // .lean() returns plain JS objects. This converts the Mongoose documents into plain JavaScript objects, without attaching Mongoose-specific functions (like .save() or .validate()).
     // await: This makes sure the code waits until the database query is complete before continuing. The function is asynchronous, meaning it doesn't block the rest of the program, but this specific line will wait for the query to resolve.
-    const allUsers = await this.find({}, "_id username email").lean(); 
-    return allUsers
+    const allUsers = await this.find({}, "_id username email").lean();
+    return allUsers;
   } catch (error) {
     console.error("Error fetching id, username, and email of users:", error);
 
@@ -72,6 +75,22 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
       await session.abortTransaction();
       return null;
     }
+
+    const allNoteIdsOfNotesOfAUser = await this.find({}, "_id")
+      .lean()
+      .session(session);
+    await Promise.all(
+      allNoteIdsOfNotesOfAUser.map(async (noteId) => {
+        const deleteNote = await notes.findById(noteId).session(session);
+
+        if (!deleteNote) {
+          return res.status(404).json({ message: "Note not found." });
+        } else {
+          await deleteImageFile(deleteNote.noteImage).session(session);
+        }
+      })
+    );
+
     // #region Multi-line Comment
     /**
      * Delete all notes associated with the user (notes having the same userId) within the same session.
@@ -92,13 +111,12 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
     // #endregion
     await session.abortTransaction();
     throw error;
-  } 
-  // #region Multi-line Comment
-  /**
-   * The finally block runs after the try or catch block, regardless of whether the operation succeeded or failed.
-   */
-  // #endregion
-  finally {
+  } finally {
+    // #region Multi-line Comment
+    /**
+     * The finally block runs after the try or catch block, regardless of whether the operation succeeded or failed.
+     */
+    // #endregion
     /**
      * Whether successful or failed, always end the session to release resources.
      * This ends the MongoDB session, releasing resources. This is necessary to avoid memory leaks or keeping a session open longer than needed.
