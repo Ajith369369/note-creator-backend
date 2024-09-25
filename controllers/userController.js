@@ -149,7 +149,7 @@ exports.adminDataController = async (req, res) => {
   try {
     // Fetch all users
     const allUsers = await users.getIdUsernameEmailOfAllUsers();
-    console.log("allUsers before adding last date: ", allUsers);
+    // console.log("allUsers before adding last date: ", allUsers);
 
     // For each user, fetch their latest note date.
     // Loop through each user to find their last note's date.
@@ -157,11 +157,11 @@ exports.adminDataController = async (req, res) => {
       allUsers.map(async (user) => {
         // Find the latest note created by this user
         const lastNote = await notes.getLastNoteForUser(user._id);
-        console.log("lastNote: ", lastNote);
+        // console.log("lastNote: ", lastNote);
 
         // Find the total number of notes created by this user
         const notesNumber = await notes.getTotalNotesOfAUser(user._id);
-        console.log('notesNumber: ', notesNumber)
+        // console.log('notesNumber: ', notesNumber)
         // Add the last note's date to the user object
         return {
           ...user,
@@ -170,7 +170,7 @@ exports.adminDataController = async (req, res) => {
         };
       })
     );
-    console.log("usersWithLastNoteDate: ", usersWithLastNoteDate);
+    // console.log("usersWithLastNoteDate: ", usersWithLastNoteDate);
     res.status(200).json({ usersWithLastNoteDate });
   } catch (error) {
     res.status(401).json(error);
@@ -178,7 +178,9 @@ exports.adminDataController = async (req, res) => {
 };
 
 exports.deleteUserController = async (req, res) => {
+  console.log('Inside deleteUserController().')
   const userId = req.params.id;
+  console.log('userId: ', userId)
 
   try {
     const result = await users.deleteUserAndNotes(userId);

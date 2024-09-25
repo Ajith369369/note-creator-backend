@@ -99,13 +99,19 @@ router.get("/profile-home/admin", jwt, userController.adminDataController);
  */
 // #endregion
 router.delete(
-  "/user/delete/:id",
+  "/profile-home/admin/user/delete/:id",
   jwt,
   userController.deleteUserController
 );
 
-// export module to backend
-// Exporting the router
-// This line exports the router object, making it available to be imported and used in the main application (index.js file). This allows the routes defined in this file to be integrated into the larger Express application.
-// The router is exported so it can be used in the main server file (index.js file), allowing these routes to be part of the API.
+// #region Multi-line Comment
+/**
+ * export module to backend
+ * Exporting the router
+ * 
+ * This line exports the router object, making it available to be imported and used in the main application (index.js file). This allows the routes defined in this file to be integrated into the larger Express application.
+ * 
+ * The router is exported so it can be used in the main server file (index.js file), allowing these routes to be part of the API.
+ */
+// #endregion
 module.exports = router;
