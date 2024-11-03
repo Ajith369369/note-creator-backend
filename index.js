@@ -1,3 +1,10 @@
+// #region Multi-line Comment
+/**
+ * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
+ */
+// #endregion
+const path = require("path");
+
 // import dotenv
 require("dotenv").config(); // loads env variable
 
@@ -41,7 +48,6 @@ noteCreatorServer.use(router);
 
 // In this version, path.join(__dirname, 'uploads') builds an absolute path to the uploads directory by combining __dirname (the directory of the current script) with uploads. This approach ensures that the server looks for uploads relative to the location of the script, regardless of where you start the server from.
 noteCreatorServer.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 // set port for the server to run
 const PORT = 3500 || process.env.PORT;
