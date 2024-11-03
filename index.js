@@ -37,7 +37,11 @@ noteCreatorServer.use(router);
 // 1st argument ('/uploads') - The name by which other application (frontend) should use the exported file/folder.
 // 2nd argument ('./uploads') - The path of the file/folder which needs to be exported.
 // The file could be seen in: "http://localhost:3500/uploads/image-1723704799894-Media Player.png"
-noteCreatorServer.use('/uploads', express.static('./uploads'))
+// noteCreatorServer.use('/uploads', express.static('./uploads'))
+
+// In this version, path.join(__dirname, 'uploads') builds an absolute path to the uploads directory by combining __dirname (the directory of the current script) with uploads. This approach ensures that the server looks for uploads relative to the location of the script, regardless of where you start the server from.
+noteCreatorServer.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // set port for the server to run
 const PORT = 3500 || process.env.PORT;
