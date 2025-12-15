@@ -1,7 +1,7 @@
 // import mongoose
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const connectionString = process.env.DATABASE;
+const connectionString = process.env.DATABASE as string;
 
 mongoose
   .connect(connectionString)
@@ -12,4 +12,4 @@ mongoose
     console.log(`Connection failed due to, ${err}`);
   });
 
-  // catch() is a function where rejected response is received.
+// catch() is a function where rejected response is received.

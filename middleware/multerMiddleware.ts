@@ -1,21 +1,26 @@
 // multer stores and handles the uploaded file in server-side.
 // MongoDB stores the name of folder in which multer has stored the uploaded file.
 
-const multer = require("multer");
+import multer, { FileFilterCallback } from "multer";
+import { Request } from "express";
 
 // storage
 const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
+  destination: (_req: Request, _file: Express.Multer.File, callback: (error: Error | null, destination: string) => void) => {
     callback(null, "./uploads");
   },
-  filename: (req, file, callback) => {
+  filename: (_req: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
     const filename = `image-${Date.now()}-${file.originalname}`;
     callback(null, filename);
   },
 });
 
 // filter
-const fileFilter = (req, file, callback) => {
+const fileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  callback: FileFilterCallback
+): void => {
   if (
     file.mimetype == "image/png" ||
     file.mimetype == "image/jpg" ||
@@ -24,7 +29,7 @@ const fileFilter = (req, file, callback) => {
     callback(null, true);
   } else {
     callback(null, false);
-    return callback(new Error("Only png, jpg, jpeg files are allowed."));
+    callback(new Error("Only png, jpg, jpeg files are allowed."));
   }
 };
 
@@ -33,4 +38,5 @@ const multerConfig = multer({
   fileFilter,
 });
 
-module.exports = multerConfig;
+export default multerConfig;
+

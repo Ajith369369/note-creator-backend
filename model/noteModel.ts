@@ -1,7 +1,22 @@
 // import mongoose
-const mongoose = require("mongoose");
+import mongoose, { Schema, Model, Document } from "mongoose";
 
-const noteSchema = new mongoose.Schema({
+// Interface for Note document
+export interface INote extends Document {
+  noteTitle: string;
+  noteContent: string;
+  noteDate: string;
+  noteImage: string;
+  userId: string;
+}
+
+// Interface for Note Model with static methods
+export interface INoteModel extends Model<INote> {
+  getLastNoteForUser(userId: string): Promise<string | null>;
+  getTotalNotesOfAUser(userId: string): Promise<number>;
+}
+
+const noteSchema = new Schema<INote>({
   noteTitle: {
     required: true,
     type: String,
@@ -25,7 +40,9 @@ const noteSchema = new mongoose.Schema({
 });
 
 // Static method to get the last note created by a specific user
-noteSchema.statics.getLastNoteForUser = async function (userId) {
+noteSchema.statics.getLastNoteForUser = async function (
+  userId: string
+): Promise<string | null> {
   try {
     // Find the most recent note for the given user, sorted by noteDate in descending order.
     // The sort({ noteDate: -1 }) ensures that it retrieves the latest note. noteDate is in a format where sorting by date works (i.e., ISO date strings).
@@ -44,7 +61,9 @@ noteSchema.statics.getLastNoteForUser = async function (userId) {
 };
 
 // Static method to count notes for a user
-noteSchema.statics.getTotalNotesOfAUser = async function (userId) {
+noteSchema.statics.getTotalNotesOfAUser = async function (
+  userId: string
+): Promise<number> {
   try {
     const totalNotes = await this.countDocuments({ userId });
     return totalNotes;
@@ -54,6 +73,7 @@ noteSchema.statics.getTotalNotesOfAUser = async function (userId) {
   }
 };
 
-const notes = mongoose.model("note", noteSchema);
+const notes: INoteModel = mongoose.model<INote, INoteModel>("note", noteSchema);
 
-module.exports = notes;
+export default notes;
+
