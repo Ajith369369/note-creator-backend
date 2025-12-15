@@ -1,18 +1,39 @@
 // Router-Specific Middleware is used in this project.
-const jwt = require("jsonwebtoken");
-const jwtMiddleware = (req, res, next) => {
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+
+interface JwtPayload {
+  userId: string;
+  iat?: number;
+}
+
+const jwtMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   console.log("Inside jwt Middleware.");
   // console.log("req.headers: ", req.headers);
 
   // Token from request header
   // in req.headers, it is "authorization" instead of "Authorization"
-  const token = req.headers["authorization"].split(" ")[1];
+  const authHeader = req.headers["authorization"];
+  
+  if (!authHeader) {
+    res.status(401).json("Authorization header missing");
+    return;
+  }
+
+  const token = authHeader.split(" ")[1];
   console.log("token: ", token);
   // next()
 
   // Verify token
   try {
-    const jwtResponse = jwt.verify(token, "ultimatesupersecretkey");
+    const jwtResponse = jwt.verify(
+      token,
+      "ultimatesupersecretkey"
+    ) as JwtPayload;
     console.log("jwtResponse: ", jwtResponse);
 
     req.payload = jwtResponse.userId;
@@ -31,4 +52,5 @@ const jwtMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = jwtMiddleware;
+export default jwtMiddleware;
+

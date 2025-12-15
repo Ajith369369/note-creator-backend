@@ -1,13 +1,29 @@
 // import mongoose
-const mongoose = require("mongoose");
+import mongoose, { Schema, Model, Document, ClientSession } from "mongoose";
 
 // import noteModel
-const notes = require("../model/noteModel");
+import notes from "./noteModel";
 
 // import deleteImageFile
-const { deleteImageFile } = require("../utils/fileUtils");
+import { deleteImageFile } from "../utils/fileUtils";
 
-const userSchema = new mongoose.Schema({
+// Interface for User document
+export interface IUser extends Document {
+  username: string;
+  email: string;
+  password: string;
+  profile?: string;
+}
+
+// Interface for User Model with static methods
+export interface IUserModel extends Model<IUser> {
+  getIdUsernameEmailOfAllUsers(): Promise<
+    Array<{ _id: string; username: string; email: string }>
+  >;
+  deleteUserAndNotes(userId: string): Promise<boolean | null>;
+}
+
+const userSchema = new Schema<IUser>({
   username: {
     required: true,
     type: String,
@@ -31,7 +47,9 @@ const userSchema = new mongoose.Schema({
  * This defines a static method on the Mongoose schema. Static methods can be called directly on the model, rather than on individual instances of the model.
  */
 // #endregion
-userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
+userSchema.statics.getIdUsernameEmailOfAllUsers = async function (): Promise<
+  Array<{ _id: string; username: string; email: string }>
+> {
   try {
     // #region Multi-line Comment
     /**
@@ -45,7 +63,7 @@ userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
      */
     // #endregion
     const allUsers = await this.find({}, "_id username email").lean();
-    return allUsers;
+    return allUsers as Array<{ _id: string; username: string; email: string }>;
   } catch (error) {
     console.error("Error fetching id, username, and email of users:", error);
 
@@ -70,14 +88,16 @@ userSchema.statics.getIdUsernameEmailOfAllUsers = async function (userId) {
  * Session: All database operations are performed within the context of a session. This ensures that the operations can be committed or rolled back as a unit.
  */
 // #endregion
-userSchema.statics.deleteUserAndNotes = async (userId) => {
+userSchema.statics.deleteUserAndNotes = async function (
+  userId: string
+): Promise<boolean | null> {
   /**
    * Start a new database transaction for the session (MongoDB session).
    * This ensures that any changes made during this session are grouped together. If one operation fails, the transaction can be rolled back to undo all changes.
    */
   console.log("Inside deleteUserAndNotes().");
 
-  const session = await mongoose.startSession();
+  const session: ClientSession = await mongoose.startSession();
   session.startTransaction();
 
   try {
@@ -98,26 +118,26 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
     // #region Multi-line Comment
     /**
      * Fetch all note IDs of the user from the 'notes' collection.
-     * 
+     *
      * Query: const allNoteIdsOfNotesOfAUser = await notes.find({}, "_id").lean().session(session);
      * This query retrieves only the _id fields of all the notes in the collection.
      * notes.find({}, "_id"): This finds all notes in the collection (no specific userId filter is applied, meaning it will retrieve notes for all users), and only the _id field of each document is returned. The second argument ("_id") is called the projection, which limits the fields returned in the result. In this case, only the _id field is returned, not the entire note.
      * This returns an array of objects where each object only contains the _id field of each note, but it fetches notes of all users, not just a specific one.
-     * 
+     *
      * Query: const allNotesOfUser = await Note.find({ userId }).lean().session(session);
      * This query is used to find all notes created by a specific user based on the userId.
      * Note.find({ userId }): Finds all notes in the notes collection where the userId matches the provided value. This retrieves the entire note objects that match the query.
-     * 
+     *
      * Query: const allNoteIdsOfNotesOfAUser = await notes.find({ userId }, "_id").lean().session(session);
      * notes.find({ userId }, "_id"): The find method is querying the notes collection for documents where the userId field matches the provided userId. It fetches all the notes created by this specific user.
      * "_id": This is the projection, which means that only the _id field of each document is returned, rather than the entire note object (which typically includes noteTitle, noteContent, noteDate, etc.). The result is a list of objects containing only the _id field of each note.
-     * 
+     *
      * .lean(): Returns plain JavaScript objects instead of Mongoose documents, which makes querying more efficient. It also removes Mongoose's built-in methods like .save() and .validate().
      * .session(session): Associates this query with a MongoDB transaction session to ensure that all database operations within this session are part of the same transaction (used in multi-step operations).
      */
     // #endregion
     const allNoteIdsOfNotesOfAUser = await notes
-      .find({userId}, "_id")
+      .find({ userId }, "_id")
       .lean()
       .session(session);
     console.log("allNoteIdsOfNotesOfAUser: ", allNoteIdsOfNotesOfAUser);
@@ -143,7 +163,7 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
            * No session needed for file system.
            */
           // #endregion
-          await deleteImageFile(deleteNote.noteImage)
+          await deleteImageFile(deleteNote.noteImage);
         }
       })
     );
@@ -192,11 +212,15 @@ userSchema.statics.deleteUserAndNotes = async (userId) => {
  * Creates a model based on the userSchema and links it to the users collection in MongoDB.
  */
 // #endregion
-const users = mongoose.model("users", userSchema);
+const users: IUserModel = mongoose.model<IUser, IUserModel>(
+  "users",
+  userSchema
+);
 
 // #region Multi-line Comment
 /**
  * Makes this model available for import in other files, allowing you to perform database operations on the users collection.
  */
 // #endregion
-module.exports = users;
+export default users;
+

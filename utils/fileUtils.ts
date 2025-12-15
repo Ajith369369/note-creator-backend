@@ -3,14 +3,14 @@
  * fs: The file system module from Node.js is used to interact with the file system. It allows you to read, write, delete, and manipulate files.
  */
 // #endregion
-const fs = require("fs");
+import fs from "fs";
 
 // #region Multi-line Comment
 /**
  * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
  */
 // #endregion
-const path = require("path");
+import path from "path";
 
 // #region Multi-line Comment
 /**
@@ -34,7 +34,7 @@ const path = require("path");
  * This line declares an asynchronous function named deleteImageFile. It takes a single parameter, noteImage, which is the filename of the image you want to delete.
  */
 // #endregion
-const deleteImageFile = async (noteImage) => {
+export const deleteImageFile = async (noteImage: string): Promise<void> => {
   // #region Multi-line Comment
   /**
    * Constructing the image file path. This line constructs the full path to the image file that needs to be deleted.
@@ -61,7 +61,7 @@ const deleteImageFile = async (noteImage) => {
    * The promise takes two callback functions: resolve (to indicate success) and reject (to indicate failure).
    */
   // #endregion
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     // #region Multi-line Comment
     /**
      * Deleting the image from the file system (uploads folder)
@@ -102,11 +102,3 @@ const deleteImageFile = async (noteImage) => {
   });
 };
 
-// #region Multi-line Comment
-/**
- * This code is used to export the deleteImageFile function from this module (file) so that it can be imported and used in other files.
- */
-// #endregion
-module.exports = {
-  deleteImageFile,
-};

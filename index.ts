@@ -3,29 +3,30 @@
  * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
  */
 // #endregion
-const path = require("path");
+import path from "path";
 
 // import dotenv
-require("dotenv").config(); // loads env variable
+import dotenv from "dotenv";
+dotenv.config(); // loads env variable
 
 // import express
-const express = require("express");
+import express, { Application } from "express";
 
 // import cors
-const cors = require("cors");
+import cors from "cors";
 
 // import router
-const router = require("./routes/router");
+import router from "./routes/router";
 
 // import MongoDB connection file
-require("./database/connection");
+import "./database/connection";
 
 // Not used in this project
 // Application-specific Middleware
 // const appmiddleware = require("./middleware/appMiddleware");
 
 // create server
-const noteCreatorServer = express();
+const noteCreatorServer: Application = express();
 
 // connect server with frontend
 noteCreatorServer.use(cors());
@@ -47,10 +48,13 @@ noteCreatorServer.use(router);
 // noteCreatorServer.use('/uploads', express.static('./uploads'))
 
 // In this version, path.join(__dirname, 'uploads') builds an absolute path to the uploads directory by combining __dirname (the directory of the current script) with uploads. This approach ensures that the server looks for uploads relative to the location of the script, regardless of where you start the server from.
-noteCreatorServer.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+noteCreatorServer.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // set port for the server to run
-const PORT = 3500 || process.env.PORT;
+const PORT = (process.env.PORT as string) || "3500";
 
 noteCreatorServer.listen(PORT, () => {
   console.log(`Server running successfully at PORT NUMBER: ${PORT}`);

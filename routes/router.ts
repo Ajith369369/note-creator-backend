@@ -5,27 +5,27 @@
 // import express
 // This is the primary framework used to create the web server. It simplifies the process of handling HTTP requests and responses.
 // Express is used to create a router and define routes that are linked to specific controller functions.
-const express = require("express");
+import express, { Router } from "express";
 
 // import userController
 // This module contains the logic for handling user-related operations. This is imported from the controllers directory.
-const userController = require("../controllers/userController");
+import * as userController from "../controllers/userController";
 
 // import noteController
 // This module contains the logic for handling note-related operations. This is imported from the controllers directory.
-const noteController = require("../controllers/noteController");
+import * as noteController from "../controllers/noteController";
 
 // jwt middleware
 // This is middleware used for handling JSON Web Token (JWT) authentication. It ensures that only authenticated users can access certain routes.
-const jwt = require("../middleware/jwtMiddleware");
+import jwt from "../middleware/jwtMiddleware";
 
 // multer middleware
 // This is middleware used for handling file uploads. It's configured to handle a single file upload for a note image, identified by the form field name "noteImage".
-const multer = require("../middleware/multerMiddleware");
+import multer from "../middleware/multerMiddleware";
 
 // create object for router class
 // router: This creates a new instance of the Express Router. The router allows you to define routes that can be modularized and used in different parts of the application.
-const router = new express.Router();
+const router: Router = express.Router();
 
 // register
 // Creates Register route
@@ -64,7 +64,11 @@ router.post(
 
 // get all notes of a user
 // router.get("/notes/user/all", jwt, noteController.getAllNotesOfAUserController);
-router.get("/notes/user/all", jwt, noteController.getAllNotesOfAUserController);
+router.get(
+  "/notes/user/all",
+  jwt,
+  noteController.getAllNotesOfAUserController
+);
 
 // get a note of a user
 router.get("/notes/user/:id", noteController.getANoteOfAUserController);
@@ -108,10 +112,11 @@ router.delete(
 /**
  * export module to backend
  * Exporting the router
- * 
+ *
  * This line exports the router object, making it available to be imported and used in the main application (index.js file). This allows the routes defined in this file to be integrated into the larger Express application.
- * 
+ *
  * The router is exported so it can be used in the main server file (index.js file), allowing these routes to be part of the API.
  */
 // #endregion
-module.exports = router;
+export default router;
+

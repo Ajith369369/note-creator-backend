@@ -1,8 +1,11 @@
-const { deleteImageFile } = require('../utils/fileUtils');
+import { Request, Response } from "express";
+import notes from "../model/noteModel";
+import { deleteImageFile } from "../utils/fileUtils";
 
-const notes = require("../model/noteModel");
-
-exports.addNoteOfAUserController = async (req, res) => {
+export const addNoteOfAUserController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   console.log("Inside addNoteController.");
   // console.log('req: ', req)
   // res.status(200).json("addNoteController received the request.");
@@ -15,7 +18,14 @@ exports.addNoteOfAUserController = async (req, res) => {
   console.log(noteTitle, noteContent, noteDate);
 
   console.log("req.file: ", req.file);
-  console.log("req.file.filename: ", req.file.filename);
+  if (req.file) {
+    console.log("req.file.filename: ", req.file.filename);
+  }
+
+  if (!req.file) {
+    res.status(400).json({ message: "No file uploaded" });
+    return;
+  }
 
   const noteImage = req.file.filename;
   console.log("noteImage: ", noteImage);
@@ -36,7 +46,7 @@ exports.addNoteOfAUserController = async (req, res) => {
         noteContent,
         noteDate, // model_variable_name == frontend_variable_name
         noteImage, // noteImage: noteimage, if model_variable_name: frontend_variable_name
-        userId,
+        userId: userId as string,
       });
       await newNote.save();
       res.status(200).json(newNote);
@@ -49,7 +59,10 @@ exports.addNoteOfAUserController = async (req, res) => {
 // get all notes of all users
 // This controller function fetches all notes from the MongoDB database and returns them to the client. If there's an error, it sends an error response.
 // This controller function will retrieve all notes from the notes collection in the MongoDB database. This means that it will fetch every note stored in that collection, regardless of which user created it.
-exports.getAllNotesOfAllUsersController = async (req, res) => {
+export const getAllNotesOfAllUsersController = async (
+  _req: Request,
+  res: Response
+): Promise<void> => {
   try {
     // notes is a Mongoose model representing the notes collection in the MongoDB database.
     // .find() fetches all documents from the notes collection.
@@ -73,8 +86,11 @@ exports.getAllNotesOfAllUsersController = async (req, res) => {
 };
 
 // get all notes of a user
-exports.getAllNotesOfAUserController = async (req, res) => {
-  const searchKey = req.query.search;
+export const getAllNotesOfAUserController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const searchKey = (req.query.search as string) || "";
   console.log("searchKey: ", searchKey);
   const userId = req.payload;
 
@@ -117,7 +133,10 @@ exports.getAllNotesOfAUserController = async (req, res) => {
 };
 
 // get a note of a user
-exports.getANoteOfAUserController = async (req, res) => {
+export const getANoteOfAUserController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   console.log("Inside getANoteOfAUserController()");
   const { id } = req.params;
   try {
@@ -155,7 +174,10 @@ exports.getANoteOfAUserController = async (req, res) => {
  * This exports the editNoteOfAUserController function so it can be used as a route handler in the Express application.
  * async (req, res): Defines an asynchronous function that handles the request (req) and response (res) objects. Asynchronous functions are used to handle operations that involve promises, such as database queries.
  */
-exports.editNoteOfAUserController = async (req, res) => {
+export const editNoteOfAUserController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   // req.params: Contains route parameters (e.g., /notes/:id).
   // id: Extracts the note ID from the request parameters, which is used to find and update the specific note.
   const { id } = req.params;
@@ -187,13 +209,18 @@ exports.editNoteOfAUserController = async (req, res) => {
         noteContent,
         noteDate,
         noteImage: uploadNoteImage,
-        userId,
+        userId: userId as string,
       },
       { new: true }
     );
 
+    if (!updateNote) {
+      res.status(404).json({ message: "Note not found" });
+      return;
+    }
+
     // updateNote.save(): This line saves the updated note document.
-    // await is used to pause the execution of the function until the updateNote.save() resolves.
+    // await is used to pause the execution until the updateNote.save() resolves.
     await updateNote.save();
 
     // res.status(200): Sets the HTTP status code to 200 OK, indicating the update was successful.
@@ -219,7 +246,10 @@ exports.editNoteOfAUserController = async (req, res) => {
  * exports.deleteNoteOfAUserController: This exports the deleteNoteOfAUserController function so it can be used as a route handler in the Express application.
  * async (req, res): Defines an asynchronous function that handles the incoming request (req) and sends a response (res). Asynchronous functions are used to handle operations that involve promises, such as database queries.
  */
-exports.deleteNoteOfAUserController = async (req, res) => {
+export const deleteNoteOfAUserController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   // #region Multi-line Comment
   /**
    * req.params: Contains route parameters (e.g., /notes/:id).
@@ -236,7 +266,8 @@ exports.deleteNoteOfAUserController = async (req, res) => {
      */
     // #endregion
     if (!deleteNote) {
-      return res.status(404).json({ message: "Note not found." });
+      res.status(404).json({ message: "Note not found." });
+      return;
     }
 
     // #region Multi-line Comment
@@ -293,12 +324,10 @@ exports.deleteNoteOfAUserController = async (req, res) => {
      * .json(deleteNote): Sends the deleted note as a JSON response to the client. This allows the client to see which note was deleted.
      */
     // #endregion
-    res
-      .status(200)
-      .json({
-        message: "Note and image were deleted successfully. Deleted note: ",
-        deleteNote,
-      });
+    res.status(200).json({
+      message: "Note and image were deleted successfully. Deleted note: ",
+      deleteNote,
+    });
   } catch (err) {
     // #region Multi-line Comment
     /**
@@ -314,34 +343,3 @@ exports.deleteNoteOfAUserController = async (req, res) => {
     });
   }
 };
-
-/**
- * (req, res): These are the request and response objects provided by Express. req contains the incoming request data, and res is used to send a response back to the client.
- * req: The request object containing details of the incoming request, including any data sent with it (such as the uploaded file).
- * res: The response object used to send back a response to the client.
- */
-
-/*exports.uploadDefaultImageForNoteOfAUserController = async (req, res) => {
-
-  // This block is used for error handling. The try block contains the code that might throw an error, and if an error occurs, the catch block will execute.
-  // This ensures that even if something goes wrong, the server can handle the situation gracefully and return a meaningful error message.
-  try {
-
-    /~*
-     * This line sends a JSON response back to the client.
-     * req.file.filename: multer stores the uploaded file on the server, and filename is the name of the file on the server. By default, multer generates a unique filename to prevent collisions.
-     * filePath: `/uploads/${req.file.filename}: This constructs the file path where the uploaded image is stored on the server. This path is relative to the public directory from which the file can be served.
-     * The client receives this filePath in the response, which it can then use to display the image or store the path in a database.
-     ~/
-    res.json({ filePath: `/uploads/${req.file.filename}` });
-
-    // If any error occurs during the file upload process (e.g., if the file can't be saved or the server has issues), the catch block is executed.
-  } catch (error) {
-
-    /~*
-     * res.status(500): This sets the HTTP status code to 500, indicating an internal server error.
-     * json({ message: "File upload failed", error }): This sends a JSON response back to the client with an error message and the error object, providing details about what went wrong.
-     ~/
-    res.status(500).json({ message: "File upload failed.", error });
-  }
-}*/

@@ -1,6 +1,7 @@
-const users = require("../model/userModel");
-const notes = require("../model/noteModel");
-const jwt = require("jsonwebtoken");
+import { Request, Response } from "express";
+import users from "../model/userModel";
+import notes from "../model/noteModel";
+import jwt from "jsonwebtoken";
 
 // register
 // POST
@@ -16,7 +17,10 @@ const jwt = require("jsonwebtoken");
 // This is an asynchronous function being exported as registerController.
 // It will handle the HTTP request and response cycle for user registration.
 // This function will handle the registration process when a client makes a registration request.
-exports.registerController = async (req, res) => {
+export const registerController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   // Logs a message to the console to indicate that the registerController function has been invoked/called.
   console.log("Inside registerController");
 
@@ -84,7 +88,10 @@ exports.registerController = async (req, res) => {
 // This is an asynchronous function being exported as loginController.
 // It will handle the HTTP request and response cycle for user login.
 // This function will handle the login process when a client makes a login request.
-exports.loginController = async (req, res) => {
+export const loginController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   // Logs a message to the console to indicate that the loginController function has been invoked/called.
   console.log("Inside login controller.");
 
@@ -139,7 +146,10 @@ exports.loginController = async (req, res) => {
   }
 };
 
-exports.adminDataController = async (req, res) => {
+export const adminDataController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   console.log("Inside adminDataController.");
 
   // Look for payload coming from jwtMiddleware.js
@@ -166,7 +176,7 @@ exports.adminDataController = async (req, res) => {
         return {
           ...user,
           notes_number: notesNumber ? notesNumber : null,
-          last_active_date: lastNote ? lastNote : null
+          last_active_date: lastNote ? lastNote : null,
         };
       })
     );
@@ -177,18 +187,24 @@ exports.adminDataController = async (req, res) => {
   }
 };
 
-exports.deleteUserController = async (req, res) => {
-  console.log('Inside deleteUserController().')
+export const deleteUserController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  console.log("Inside deleteUserController().");
   const userId = req.params.id;
-  console.log('userId: ', userId)
+  console.log("userId: ", userId);
 
   try {
     const result = await users.deleteUserAndNotes(userId);
 
     if (!result) {
-      return res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
+      return;
     }
-    res.status(200).json({ message: "User and associated notes deleted successfully." });
+    res
+      .status(200)
+      .json({ message: "User and associated notes deleted successfully." });
   } catch (error) {
     res.status(500).json({ message: "An error occurred", error });
   }
