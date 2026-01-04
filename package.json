@@ -12,6 +12,7 @@
     "lint:watch": "nodemon --watch . --ext ts --ignore dist --ignore node_modules --exec \"npm run lint\"",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --watch --noEmit",
+    "watch": "concurrently \"npm run lint:watch\" \"npm run typecheck:watch\" --names \"lint,typecheck\" --prefix-colors \"yellow,blue\"",
     "format": "prettier --write \"**/*.{ts,json,md}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,json,md}\" --ignore-path .gitignore"
   },
@@ -37,6 +38,7 @@
     "@types/node": "^25.0.2",
     "@typescript-eslint/eslint-plugin": "^8.51.0",
     "@typescript-eslint/parser": "^8.51.0",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
     "nodemon": "^3.1.11",
