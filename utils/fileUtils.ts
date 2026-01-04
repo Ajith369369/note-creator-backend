@@ -10,7 +10,12 @@ import fs from "fs";
  * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
  */
 // #endregion
-import path from "path";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+
+// ES modules don't have __dirname, so we need to create it from import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // #region Multi-line Comment
 /**
@@ -101,4 +106,3 @@ export const deleteImageFile = async (noteImage: string): Promise<void> => {
     });
   });
 };
-

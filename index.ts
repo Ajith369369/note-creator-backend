@@ -4,6 +4,12 @@
  */
 // #endregion
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+// ES modules don't have __dirname, so we need to create it from import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // import dotenv
 import dotenv from "dotenv";
