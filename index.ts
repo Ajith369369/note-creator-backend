@@ -3,17 +3,19 @@
  * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
  */
 // #endregion
-import path from "path";
+// import dotenv FIRST before any other imports that might use environment variables
+import dotenv from "dotenv";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { dirname, join } from "path";
 
 // ES modules don't have __dirname, so we need to create it from import.meta.url
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// import dotenv
-import dotenv from "dotenv";
-dotenv.config(); // loads env variable
+// Configure dotenv with explicit path to .env file
+dotenv.config({ path: join(__dirname, ".env") });
+
+import path from "path";
 
 // import express
 import express, { Application } from "express";

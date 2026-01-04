@@ -1,7 +1,22 @@
 // import mongoose
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
-const connectionString = process.env.DATABASE as string;
+// Configure dotenv if not already configured (for ES modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: join(__dirname, "..", ".env") });
+
+const connectionString = process.env.DATABASE;
+
+if (!connectionString) {
+  console.error(
+    "Error: DATABASE environment variable is not set. Please check your .env file."
+  );
+  process.exit(1);
+}
 
 mongoose
   .connect(connectionString)
