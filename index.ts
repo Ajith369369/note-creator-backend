@@ -5,8 +5,8 @@
 // #endregion
 // import dotenv FIRST before any other imports that might use environment variables
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 // ES modules don't have __dirname, so we need to create it from import.meta.url
 const __filename = fileURLToPath(import.meta.url);
@@ -14,8 +14,6 @@ const __dirname = dirname(__filename);
 
 // Configure dotenv with explicit path to .env file
 dotenv.config({ path: join(__dirname, ".env") });
-
-import path from "path";
 
 // import express
 import express, { Application } from "express";
@@ -56,10 +54,7 @@ noteCreatorServer.use(router);
 // noteCreatorServer.use('/uploads', express.static('./uploads'))
 
 // In this version, path.join(__dirname, 'uploads') builds an absolute path to the uploads directory by combining __dirname (the directory of the current script) with uploads. This approach ensures that the server looks for uploads relative to the location of the script, regardless of where you start the server from.
-noteCreatorServer.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads"))
-);
+noteCreatorServer.use("/uploads", express.static(join(__dirname, "uploads")));
 
 // set port for the server to run
 const PORT = (process.env.PORT as string) || "3500";
