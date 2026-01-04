@@ -66,7 +66,7 @@ npm run typecheck
 
 ## Project Structure
 
-```
+```plain
 backend/
 ├── dist/              # Compiled JavaScript (generated)
 ├── controllers/       # Request handlers (.ts)
