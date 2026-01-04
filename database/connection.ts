@@ -1,8 +1,8 @@
 // import mongoose
-import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 // Configure dotenv if not already configured (for ES modules)
 const __filename = fileURLToPath(import.meta.url);
