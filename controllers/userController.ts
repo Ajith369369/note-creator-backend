@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import users from "../model/userModel";
-import notes from "../model/noteModel";
 import jwt from "jsonwebtoken";
+import notes from "../model/noteModel";
+import users from "../model/userModel";
 
 // register
 // POST
@@ -209,4 +209,3 @@ export const deleteUserController = async (
     res.status(500).json({ message: "An error occurred", error });
   }
 };
-
