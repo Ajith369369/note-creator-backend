@@ -1,13 +1,14 @@
 {
   "name": "note-creator-backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon",
-    "lint": "eslint . --ext .ts --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint . --ext .ts --fix --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,json,md}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,json,md}\" --ignore-path .gitignore"
@@ -35,9 +36,11 @@
     "@typescript-eslint/eslint-plugin": "^8.51.0",
     "@typescript-eslint/parser": "^8.51.0",
     "eslint": "^9.39.2",
+    "globals": "^17.0.0",
     "nodemon": "^3.1.11",
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0"
   }
