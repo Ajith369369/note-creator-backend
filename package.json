@@ -9,7 +9,7 @@
     "dev": "nodemon",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
-    "lint:watch": "nodemon --watch . --ext ts --ignore dist --ignore node_modules --exec \"npm run lint\"",
+    "lint:watch": "nodemon --watch . --ext ts --ignore dist --ignore node_modules --exec \"npm run lint || true\"",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --watch --noEmit",
     "watch": "concurrently \"npm run lint:watch\" \"npm run typecheck:watch\" --names \"lint,typecheck\" --prefix-colors \"yellow,blue\"",
