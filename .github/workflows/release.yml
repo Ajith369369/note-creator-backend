@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Your local version (matches your v22.20.0)
+          cache: npm # Speeds up by caching node_modules
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2 #  A popular third-party GitHub Action that automatically creates a GitHub Release when you push a git tag.
+        if: github.ref_type == 'tag'  # Only run on tag pushes (e.g., v1.0.0)
+        with:
+          generate_release_notes: true # AI-generated changelog from commits/PRs
