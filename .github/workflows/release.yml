@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   release:
@@ -25,6 +25,5 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2 #  A popular third-party GitHub Action that automatically creates a GitHub Release when you push a git tag.
-        if: github.ref_type == 'tag'  # Only run on tag pushes (e.g., v1.0.0)
         with:
           generate_release_notes: true # AI-generated changelog from commits/PRs
