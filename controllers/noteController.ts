@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import notes from "../model/noteModel";
-import { deleteImageFile } from "../utils/fileUtils";
+import notes from "../model/noteModel.js";
+import { deleteImageFile } from "../utils/fileUtils.js";
 
 export const addNoteOfAUserController = async (
   req: Request,

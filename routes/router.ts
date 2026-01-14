@@ -9,19 +9,19 @@ import express, { Router } from "express";
 
 // import userController
 // This module contains the logic for handling user-related operations. This is imported from the controllers directory.
-import * as userController from "../controllers/userController";
+import * as userController from "../controllers/userController.js";
 
 // import noteController
 // This module contains the logic for handling note-related operations. This is imported from the controllers directory.
-import * as noteController from "../controllers/noteController";
+import * as noteController from "../controllers/noteController.js";
 
 // jwt middleware
 // This is middleware used for handling JSON Web Token (JWT) authentication. It ensures that only authenticated users can access certain routes.
-import jwt from "../middleware/jwtMiddleware";
+import jwt from "../middleware/jwtMiddleware.js";
 
 // multer middleware
 // This is middleware used for handling file uploads. It's configured to handle a single file upload for a note image, identified by the form field name "noteImage".
-import multer from "../middleware/multerMiddleware";
+import multer from "../middleware/multerMiddleware.js";
 
 // create object for router class
 // router: This creates a new instance of the Express Router. The router allows you to define routes that can be modularized and used in different parts of the application.

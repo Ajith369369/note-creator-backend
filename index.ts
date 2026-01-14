@@ -22,10 +22,10 @@ import express, { Application } from "express";
 import cors from "cors";
 
 // import router
-import router from "./routes/router";
+import router from "./routes/router.js";
 
 // import MongoDB connection file
-import "./database/connection";
+import "./database/connection.js";
 
 // Not used in this project
 // Application-specific Middleware
