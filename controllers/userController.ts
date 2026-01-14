@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import notes from "../model/noteModel";
-import users from "../model/userModel";
+import notes from "../model/noteModel.js";
+import users from "../model/userModel.js";
 
 // register
 // POST

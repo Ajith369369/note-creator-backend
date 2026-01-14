@@ -2,10 +2,10 @@
 import mongoose, { Schema, Model, Document, ClientSession } from "mongoose";
 
 // import noteModel
-import notes from "./noteModel";
+import notes from "./noteModel.js";
 
 // import deleteImageFile
-import { deleteImageFile } from "../utils/fileUtils";
+import { deleteImageFile } from "../utils/fileUtils.js";
 
 // Interface for User document
 export interface IUser extends Document {
