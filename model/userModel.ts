@@ -1,5 +1,5 @@
 // import mongoose
-import mongoose, { Schema, Model, Document, ClientSession } from "mongoose";
+import mongoose, { ClientSession, Document, Model, Schema } from "mongoose";
 
 // import noteModel
 import notes from "./noteModel.js";
@@ -223,4 +223,3 @@ const users: IUserModel = mongoose.model<IUser, IUserModel>(
  */
 // #endregion
 export default users;
-
