@@ -1,12 +1,6 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteNoteOfAUserController = exports.editNoteOfAUserController = exports.getANoteOfAUserController = exports.getAllNotesOfAUserController = exports.getAllNotesOfAllUsersController = exports.addNoteOfAUserController = void 0;
-const noteModel_1 = __importDefault(require("../model/noteModel"));
-const fileUtils_1 = require("../utils/fileUtils");
-const addNoteOfAUserController = async (req, res) => {
+import notes from "../model/noteModel.js";
+import { deleteImageFile } from "../utils/fileUtils.js";
+export const addNoteOfAUserController = async (req, res) => {
     console.log("Inside addNoteController.");
     // console.log('req: ', req)
     // res.status(200).json("addNoteController received the request.");
@@ -23,20 +17,22 @@ const addNoteOfAUserController = async (req, res) => {
         res.status(400).json({ message: "No file uploaded" });
         return;
     }
-    const noteImage = req.file.filename;
-    console.log("noteImage: ", noteImage);
+    // Cloudinary returns the secure URL in req.file.path
+    const cloudinaryFile = req.file;
+    const noteImage = cloudinaryFile?.path || req.file.filename;
+    console.log("noteImage (Cloudinary URL): ", noteImage);
     // res.status(200).json("Request received.");
     try {
         // This line performs a query on the notes collection in MongoDB.
         //findOne is a method provided by Mongoose (or MongoDB's native driver) that searches for a single document in the collection that matches the query criteria.
         // This is shorthand syntax for { noteTitle: noteTitle }, meaning that it is looking for a document where the noteTitle field in the document matches the value of the noteTitle variable.
         // await is used to pause the execution of the function until the findOne method resolves. This ensures that existingNote contains the result of the query before proceeding.
-        const existingNote = await noteModel_1.default.findOne({ noteTitle });
+        const existingNote = await notes.findOne({ noteTitle });
         if (existingNote) {
             res.status(406).json("Note already exists.");
         }
         else {
-            const newNote = new noteModel_1.default({
+            const newNote = new notes({
                 noteTitle,
                 noteContent,
                 noteDate, // model_variable_name == frontend_variable_name
@@ -51,16 +47,15 @@ const addNoteOfAUserController = async (req, res) => {
         res.status(401).json(error);
     }
 };
-exports.addNoteOfAUserController = addNoteOfAUserController;
 // get all notes of all users
 // This controller function fetches all notes from the MongoDB database and returns them to the client. If there's an error, it sends an error response.
 // This controller function will retrieve all notes from the notes collection in the MongoDB database. This means that it will fetch every note stored in that collection, regardless of which user created it.
-const getAllNotesOfAllUsersController = async (_req, res) => {
+export const getAllNotesOfAllUsersController = async (_req, res) => {
     try {
         // notes is a Mongoose model representing the notes collection in the MongoDB database.
         // .find() fetches all documents from the notes collection.
         // await is used to pause the execution of the function until the find method resolves.
-        const allNotes = await noteModel_1.default.find();
+        const allNotes = await notes.find();
         // res.status(200): Sets the HTTP status code of the response to 200 OK, indicating that the request was successful.
         // .json(): This method converts the provided JavaScript object into a JSON-formatted string and sends it as the body of the response.
         // .json(allNotes): Sends the allNotes data as a JSON response to the client.
@@ -77,9 +72,8 @@ const getAllNotesOfAllUsersController = async (_req, res) => {
             .json({ message: "An error occurred while fetching all notes", error });
     }
 };
-exports.getAllNotesOfAllUsersController = getAllNotesOfAllUsersController;
 // get all notes of a user
-const getAllNotesOfAUserController = async (req, res) => {
+export const getAllNotesOfAUserController = async (req, res) => {
     const searchKey = req.query.search || "";
     console.log("searchKey: ", searchKey);
     const userId = req.payload;
@@ -92,7 +86,7 @@ const getAllNotesOfAUserController = async (req, res) => {
         },
     };
     try {
-        const allUserNote = await noteModel_1.default.find(query);
+        const allUserNote = await notes.find(query);
         res.status(200).json(allUserNote);
         // userId is the identifier for the user whose notes you want to retrieve.
         //
@@ -118,13 +112,12 @@ const getAllNotesOfAUserController = async (req, res) => {
         });
     }
 };
-exports.getAllNotesOfAUserController = getAllNotesOfAUserController;
 // get a note of a user
-const getANoteOfAUserController = async (req, res) => {
+export const getANoteOfAUserController = async (req, res) => {
     console.log("Inside getANoteOfAUserController()");
     const { id } = req.params;
     try {
-        const aUserNote = await noteModel_1.default.find({ _id: id });
+        const aUserNote = await notes.find({ _id: id });
         res.status(200).json(aUserNote);
         // userId is the identifier for the user whose notes you want to retrieve.
         //
@@ -150,14 +143,13 @@ const getANoteOfAUserController = async (req, res) => {
         });
     }
 };
-exports.getANoteOfAUserController = getANoteOfAUserController;
 /**
  * Edit note of a user.
  * To update an existing note in the MongoDB database with new information provided in the request.
  * This exports the editNoteOfAUserController function so it can be used as a route handler in the Express application.
  * async (req, res): Defines an asynchronous function that handles the request (req) and response (res) objects. Asynchronous functions are used to handle operations that involve promises, such as database queries.
  */
-const editNoteOfAUserController = async (req, res) => {
+export const editNoteOfAUserController = async (req, res) => {
     // req.params: Contains route parameters (e.g., /notes/:id).
     // id: Extracts the note ID from the request parameters, which is used to find and update the specific note.
     const { id } = req.params;
@@ -167,10 +159,23 @@ const editNoteOfAUserController = async (req, res) => {
     // Extracts noteTitle, noteContent, noteDate, and noteImage from the body. These are the fields to update in the note.
     const { noteTitle, noteContent, noteDate, noteImage } = req.body;
     // req.file: If an image file is uploaded, it will be available in req.file.
-    // req.file.filename: The name of the uploaded image file.
+    // Cloudinary returns the secure URL in req.file.path
     // noteImage: If no new file is uploaded, it uses the existing noteImage value from the request body.
-    // uploadNoteImage: Determines which image filename to use — either the newly uploaded image or the existing one.
-    const uploadNoteImage = req.file ? req.file.filename : noteImage;
+    // uploadNoteImage: Determines which image URL to use — either the newly uploaded Cloudinary URL or the existing one.
+    const cloudinaryFile = req.file;
+    const uploadNoteImage = req.file
+        ? cloudinaryFile?.path || req.file.filename // New Cloudinary URL
+        : noteImage; // Existing URL (could be Cloudinary or legacy)
+    // If updating with new image, delete old Cloudinary image if it exists
+    if (req.file && noteImage && noteImage.includes("cloudinary.com")) {
+        try {
+            await deleteImageFile(noteImage);
+        }
+        catch (error) {
+            console.error("Error deleting old Cloudinary image:", error);
+            // Continue with update even if deletion fails
+        }
+    }
     // Starts a try-catch block to handle any potential errors that may occur during the database operation.
     try {
         // Updating the note.
@@ -178,7 +183,7 @@ const editNoteOfAUserController = async (req, res) => {
         // { _id: id }: Query to find the note by its _id (which is the ID extracted from the request parameters).
         // { noteTitle, noteContent, noteDate, noteImage: uploadNoteImage, userId }: New data to update the note with.
         // { new: true }: Option to return the updated document instead of the original one.
-        const updateNote = await noteModel_1.default.findByIdAndUpdate({ _id: id }, {
+        const updateNote = await notes.findByIdAndUpdate({ _id: id }, {
             noteTitle,
             noteContent,
             noteDate,
@@ -208,14 +213,13 @@ const editNoteOfAUserController = async (req, res) => {
         });
     }
 };
-exports.editNoteOfAUserController = editNoteOfAUserController;
 /**
  * Delete note of a user.
  * This function ensures that both the note and its associated image are deleted.
  * exports.deleteNoteOfAUserController: This exports the deleteNoteOfAUserController function so it can be used as a route handler in the Express application.
  * async (req, res): Defines an asynchronous function that handles the incoming request (req) and sends a response (res). Asynchronous functions are used to handle operations that involve promises, such as database queries.
  */
-const deleteNoteOfAUserController = async (req, res) => {
+export const deleteNoteOfAUserController = async (req, res) => {
     // #region Multi-line Comment
     /**
      * req.params: Contains route parameters (e.g., /notes/:id).
@@ -224,7 +228,7 @@ const deleteNoteOfAUserController = async (req, res) => {
     // #endregion
     const { id } = req.params;
     try {
-        const deleteNote = await noteModel_1.default.findById(id);
+        const deleteNote = await notes.findById(id);
         // #region Multi-line Comment
         /**
          * If the note doesn't exist (i.e., note is null), a 404 Not Found status is returned along with a JSON message indicating that the note was not found.
@@ -234,42 +238,8 @@ const deleteNoteOfAUserController = async (req, res) => {
             res.status(404).json({ message: "Note not found." });
             return;
         }
-        // #region Multi-line Comment
-        /**
-         * Call the deleteImageFile function.
-         */
-        // #endregion
-        await (0, fileUtils_1.deleteImageFile)(deleteNote.noteImage);
-        // #region Multi-line Comment
-        /**
-         * Constructing the image file path
-         * path.join(): This constructs the full path to the image file associated with the note.
-         * __dirname: Refers to the current directory (where this code resides).
-         * '..': Moves up one level in the directory structure (to the parent folder).
-         * 'uploads': Points to the "uploads" folder where the image files are stored.
-         * note.noteImage: The image filename stored in the note document in the database. The noteImage field contains just the filename, not the full path.
-         */
-        // #endregion
-        /* const imagePath = path.join(
-          __dirname,
-          "..",
-          "uploads",
-          deleteNote.noteImage
-        ); */
-        // #region Multi-line Comment
-        /**
-         * Deleting the image from the file system (uploads folder)
-         * fs.unlink(): Deletes the image file from the file system. It takes the imagePath as the first argument and a callback function as the second argument.
-         * err: If an error occurs during deletion (e.g., the file doesn't exist), it's handled inside the callback, where it logs the error to the console.
-         */
-        // #endregion
-        /* fs.unlink(imagePath, (err) => {
-          if (err) {
-            console.error("Error while deleting the image file: ", err);
-          } else {
-            console.log("Successfully deleted the image file.");
-          }
-        }); */
+        // Delete image from Cloudinary
+        await deleteImageFile(deleteNote.noteImage);
         // #region Multi-line Comment
         /**
          * Delete the note from the database.
@@ -278,7 +248,7 @@ const deleteNoteOfAUserController = async (req, res) => {
          * await is used to pause the execution until the findByIdAndDelete operation is complete, allowing the code to wait for the promise to resolve and get the result.
          */
         // #endregion
-        await noteModel_1.default.findByIdAndDelete({ _id: id });
+        await notes.findByIdAndDelete({ _id: id });
         // #region Multi-line Comment
         /**
          * res.status(200): Sets the HTTP status code to 200 OK, indicating that the request was successful.
@@ -305,5 +275,4 @@ const deleteNoteOfAUserController = async (req, res) => {
         });
     }
 };
-exports.deleteNoteOfAUserController = deleteNoteOfAUserController;
 //# sourceMappingURL=noteController.js.map

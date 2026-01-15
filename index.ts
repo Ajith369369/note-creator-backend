@@ -1,8 +1,3 @@
-// #region Multi-line Comment
-/**
- * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
- */
-// #endregion
 // import dotenv FIRST before any other imports that might use environment variables
 import dotenv from "dotenv";
 import { dirname, join } from "path";
@@ -46,15 +41,6 @@ noteCreatorServer.use(express.json());
 
 // router
 noteCreatorServer.use(router);
-
-// static() is used to export a file/folder from the server-side.
-// 1st argument ('/uploads') - The name by which other application (frontend) should use the exported file/folder.
-// 2nd argument ('./uploads') - The path of the file/folder which needs to be exported.
-// The file could be seen in: "http://localhost:3500/uploads/image-1723704799894-Media Player.png"
-// noteCreatorServer.use('/uploads', express.static('./uploads'))
-
-// In this version, path.join(__dirname, 'uploads') builds an absolute path to the uploads directory by combining __dirname (the directory of the current script) with uploads. This approach ensures that the server looks for uploads relative to the location of the script, regardless of where you start the server from.
-noteCreatorServer.use("/uploads", express.static(join(__dirname, "uploads")));
 
 // set port for the server to run
 const PORT = (process.env.PORT as string) || "3500";

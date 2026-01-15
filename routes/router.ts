@@ -20,7 +20,7 @@ import * as noteController from "../controllers/noteController.js";
 import jwt from "../middleware/jwtMiddleware.js";
 
 // multer middleware
-// This is middleware used for handling file uploads. It's configured to handle a single file upload for a note image, identified by the form field name "noteImage".
+// This middleware handles file uploads to Cloudinary. It processes a single file upload for a note image, identified by the form field name "noteImage".
 import multer from "../middleware/multerMiddleware.js";
 
 // create object for router class
@@ -84,11 +84,10 @@ router.delete(
   noteController.deleteNoteOfAUserController
 );
 
-// upload default image
-// This backend route handles file uploads from the client. It uses multer to process and save the uploaded file on the server, then responds with the file's path if successful. If an error occurs, it catches the error and sends a response indicating that the upload failed. This setup allows the frontend to upload images or files to the server, receive the path of the uploaded file, and use it as needed
-// 'noteImage': This is the name of the form field (key) that contains the file being uploaded. It must match the name used in formData.append("noteImage", file) on the frontend.
-// This middleware extracts the uploaded file from the request, processes it (e.g., stores it in a designated folder), and makes it accessible via req.file.
-// router.post('/upload', jwt, multer.single("noteImage"), noteController.uploadDefaultImageForNoteOfAUserController)
+// Note: Images are uploaded to Cloudinary cloud storage via multer middleware.
+// The Cloudinary URL is returned in req.file.path and stored in the database.
+// 'noteImage': This is the name of the form field (key) that contains the file being uploaded.
+// It must match the name used in formData.append("noteImage", file) on the frontend.
 
 // get data for admin dashboard
 router.get("/profile-home/admin", jwt, userController.adminDataController);

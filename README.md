@@ -50,6 +50,7 @@ For production deployment:
    ```
 
 2. Start the server:
+
    ```bash
    npm start
    ```
@@ -76,7 +77,6 @@ backend/
 ├── routes/            # API routes (.ts)
 ├── types/             # TypeScript type definitions
 ├── utils/             # Utility functions (.ts)
-├── uploads/           # Uploaded files
 ├── tsconfig.json      # TypeScript configuration
 ├── nodemon.json       # Nodemon configuration
 └── package.json       # Dependencies and scripts
@@ -93,7 +93,7 @@ backend/
 
 Create a `.env` file in the root directory with:
 
-```
+```bash
 PORT=3500
 DATABASE=your_mongodb_connection_string
 
@@ -176,4 +176,4 @@ These platforms typically require serverless functions. Consider using a differe
 - The `dist/` folder is generated during build and should be added to `.gitignore`
 - Source TypeScript files are in the root directories
 - Type definitions are in the `types/` directory
-- Uploaded files are stored in the `uploads/` directory
+- Images are stored in Cloudinary cloud storage (not local filesystem)

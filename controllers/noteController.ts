@@ -285,44 +285,8 @@ export const deleteNoteOfAUserController = async (
       return;
     }
 
-    // #region Multi-line Comment
-    /**
-     * Call the deleteImageFile function.
-     */
-    // #endregion
+    // Delete image from Cloudinary
     await deleteImageFile(deleteNote.noteImage);
-
-    // #region Multi-line Comment
-    /**
-     * Constructing the image file path
-     * path.join(): This constructs the full path to the image file associated with the note.
-     * __dirname: Refers to the current directory (where this code resides).
-     * '..': Moves up one level in the directory structure (to the parent folder).
-     * 'uploads': Points to the "uploads" folder where the image files are stored.
-     * note.noteImage: The image filename stored in the note document in the database. The noteImage field contains just the filename, not the full path.
-     */
-    // #endregion
-    /* const imagePath = path.join(
-      __dirname,
-      "..",
-      "uploads",
-      deleteNote.noteImage
-    ); */
-
-    // #region Multi-line Comment
-    /**
-     * Deleting the image from the file system (uploads folder)
-     * fs.unlink(): Deletes the image file from the file system. It takes the imagePath as the first argument and a callback function as the second argument.
-     * err: If an error occurs during deletion (e.g., the file doesn't exist), it's handled inside the callback, where it logs the error to the console.
-     */
-    // #endregion
-    /* fs.unlink(imagePath, (err) => {
-      if (err) {
-        console.error("Error while deleting the image file: ", err);
-      } else {
-        console.log("Successfully deleted the image file.");
-      }
-    }); */
     // #region Multi-line Comment
     /**
      * Delete the note from the database.

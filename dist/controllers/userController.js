@@ -1,12 +1,6 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserController = exports.adminDataController = exports.loginController = exports.registerController = void 0;
-const userModel_1 = __importDefault(require("../model/userModel"));
-const noteModel_1 = __importDefault(require("../model/noteModel"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+import jwt from "jsonwebtoken";
+import notes from "../model/noteModel.js";
+import users from "../model/userModel.js";
 // register
 // POST
 // http://localhost:4000/register
@@ -20,7 +14,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 // This is an asynchronous function being exported as registerController.
 // It will handle the HTTP request and response cycle for user registration.
 // This function will handle the registration process when a client makes a registration request.
-const registerController = async (req, res) => {
+export const registerController = async (req, res) => {
     // Logs a message to the console to indicate that the registerController function has been invoked/called.
     console.log("Inside registerController");
     // Destructures the username, email, and password properties from the req.body object.
@@ -35,7 +29,7 @@ const registerController = async (req, res) => {
         // users is a Mongoose model representing the users collection in MongoDB.
         // Checks if a user with the given email already exists in the database. If the user is found, it will be stored in the existingUser variable.
         // await pauses the execution until the promise returned by users.findOne() is resolved.
-        const existingUser = await userModel_1.default.findOne({ email });
+        const existingUser = await users.findOne({ email });
         // email: email => email => email(model): email(console.log(username, email, password);)
         // If existingUser is not null (i.e., a user with the given email is found), this condition will be true.
         if (existingUser) {
@@ -49,7 +43,7 @@ const registerController = async (req, res) => {
             // The new user's details, including username, email, and password, are assigned.
             // The profile field is initialized as empty string.
             // This prepares the data to be saved to the database.
-            const newUser = new userModel_1.default({
+            const newUser = new users({
                 username,
                 email,
                 password,
@@ -68,7 +62,6 @@ const registerController = async (req, res) => {
         res.status(401).json(error);
     }
 };
-exports.registerController = registerController;
 // login
 // POST
 // http://localhost:4000/login
@@ -79,7 +72,7 @@ exports.registerController = registerController;
 // This is an asynchronous function being exported as loginController.
 // It will handle the HTTP request and response cycle for user login.
 // This function will handle the login process when a client makes a login request.
-const loginController = async (req, res) => {
+export const loginController = async (req, res) => {
     // Logs a message to the console to indicate that the loginController function has been invoked/called.
     console.log("Inside login controller.");
     // Destructures email and password properties from the req.body object.
@@ -93,7 +86,7 @@ const loginController = async (req, res) => {
         // users is a Mongoose model representing the users collection in MongoDB.
         // Checks if a user with the given email and password exists in the database. If the user is found, it will be stored in the existingUser variable.
         // await pauses the execution until the promise returned by users.findOne() is resolved.
-        const existingUser = await userModel_1.default.findOne({ email, password });
+        const existingUser = await users.findOne({ email, password });
         // Logs the existingUser object to the console, which contains the user data retrieved from the database.
         console.log(existingUser);
         // If existingUser is not null (i.e., a user with the given email and password was found), this condition will be true.
@@ -101,7 +94,7 @@ const loginController = async (req, res) => {
             // If a user is found, this line generates a JWT (JSON Web Token).
             // The token is created using the jwt.sign() method, which takes a payload (in this case, the user's ID) and a secret key ("supersecretkey").
             // The token will be used for authenticating future requests from the client.
-            const token = jsonwebtoken_1.default.sign({ userId: existingUser._id }, "ultimatesupersecretkey");
+            const token = jwt.sign({ userId: existingUser._id }, "ultimatesupersecretkey");
             // Logs the generated token to the console.
             console.log(token);
             // If the login is successful, the server responds with a 200 OK status code and sends back a JSON object containing the existingUser data and the token.
@@ -123,24 +116,23 @@ const loginController = async (req, res) => {
         res.status(401).json(error);
     }
 };
-exports.loginController = loginController;
-const adminDataController = async (req, res) => {
+export const adminDataController = async (req, res) => {
     console.log("Inside adminDataController.");
     // Look for payload coming from jwtMiddleware.js
     const userId = req.payload;
     console.log("userId from payload coming from jwtMiddleware.js: ", userId);
     try {
         // Fetch all users
-        const allUsers = await userModel_1.default.getIdUsernameEmailOfAllUsers();
+        const allUsers = await users.getIdUsernameEmailOfAllUsers();
         // console.log("allUsers before adding last date: ", allUsers);
         // For each user, fetch their latest note date.
         // Loop through each user to find their last note's date.
         const usersWithLastNoteDate = await Promise.all(allUsers.map(async (user) => {
             // Find the latest note created by this user
-            const lastNote = await noteModel_1.default.getLastNoteForUser(user._id);
+            const lastNote = await notes.getLastNoteForUser(user._id);
             // console.log("lastNote: ", lastNote);
             // Find the total number of notes created by this user
-            const notesNumber = await noteModel_1.default.getTotalNotesOfAUser(user._id);
+            const notesNumber = await notes.getTotalNotesOfAUser(user._id);
             // console.log('notesNumber: ', notesNumber)
             // Add the last note's date to the user object
             return {
@@ -156,13 +148,12 @@ const adminDataController = async (req, res) => {
         res.status(401).json(error);
     }
 };
-exports.adminDataController = adminDataController;
-const deleteUserController = async (req, res) => {
+export const deleteUserController = async (req, res) => {
     console.log("Inside deleteUserController().");
     const userId = req.params.id;
     console.log("userId: ", userId);
     try {
-        const result = await userModel_1.default.deleteUserAndNotes(userId);
+        const result = await users.deleteUserAndNotes(userId);
         if (!result) {
             res.status(404).json({ message: "User not found" });
             return;
@@ -175,5 +166,4 @@ const deleteUserController = async (req, res) => {
         res.status(500).json({ message: "An error occurred", error });
     }
 };
-exports.deleteUserController = deleteUserController;
 //# sourceMappingURL=userController.js.map
