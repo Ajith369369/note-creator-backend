@@ -8,6 +8,8 @@
     "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:prod": "npm run build && node dist/index.js",
+    "validate:build": "npm run build && echo 'Build validation successful'",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
     "lint:watch": "nodemon --watch . --ext ts --ignore dist --ignore node_modules --exec \"npm run lint || true\"",
