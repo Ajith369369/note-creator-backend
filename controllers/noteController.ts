@@ -22,15 +22,17 @@ export const addNoteOfAUserController = async (
     console.log("req.file.filename: ", req.file.filename);
   }
 
-  if (!req.file) {
-    res.status(400).json({ message: "No file uploaded" });
-    return;
-  }
+  // Handle image - make it optional
+  let noteImage = ""; // Default empty string for notes without images
 
-  // Cloudinary returns the secure URL in req.file.path
-  const cloudinaryFile = req.file as Express.CloudinaryFile;
-  const noteImage = cloudinaryFile?.path || req.file.filename;
-  console.log("noteImage (Cloudinary URL): ", noteImage);
+  if (req.file) {
+    // Cloudinary returns the secure URL in req.file.path
+    const cloudinaryFile = req.file as Express.CloudinaryFile;
+    noteImage = cloudinaryFile?.path || req.file.filename || "";
+    console.log("noteImage (Cloudinary URL): ", noteImage);
+  } else {
+    console.log("No image uploaded - creating note without image");
+  }
 
   // res.status(200).json("Request received.");
   try {
@@ -193,21 +195,31 @@ export const editNoteOfAUserController = async (
 
   // req.file: If an image file is uploaded, it will be available in req.file.
   // Cloudinary returns the secure URL in req.file.path
-  // noteImage: If no new file is uploaded, it uses the existing noteImage value from the request body.
+  // noteImage: If no new file is uploaded, it uses the existing noteImage value from the request body (or empty string).
   // uploadNoteImage: Determines which image URL to use — either the newly uploaded Cloudinary URL or the existing one.
-  const cloudinaryFile = req.file as Express.CloudinaryFile;
-  const uploadNoteImage = req.file
-    ? cloudinaryFile?.path || req.file.filename // New Cloudinary URL
-    : noteImage; // Existing URL (could be Cloudinary or legacy)
+  let uploadNoteImage = ""; // Default empty string
 
-  // If updating with new image, delete old Cloudinary image if it exists
-  if (req.file && noteImage && noteImage.includes("cloudinary.com")) {
-    try {
-      await deleteImageFile(noteImage);
-    } catch (error) {
-      console.error("Error deleting old Cloudinary image:", error);
-      // Continue with update even if deletion fails
+  if (req.file) {
+    // New image uploaded
+    const cloudinaryFile = req.file as Express.CloudinaryFile;
+    uploadNoteImage = cloudinaryFile?.path || req.file.filename || "";
+
+    // If updating with new image, delete old Cloudinary image if it exists
+    if (
+      noteImage &&
+      noteImage.trim() !== "" &&
+      noteImage.includes("cloudinary.com")
+    ) {
+      try {
+        await deleteImageFile(noteImage);
+      } catch (error) {
+        console.error("Error deleting old Cloudinary image:", error);
+        // Continue with update even if deletion fails
+      }
     }
+  } else {
+    // No new image uploaded - keep existing image (or empty string if none)
+    uploadNoteImage = noteImage || "";
   }
 
   // Starts a try-catch block to handle any potential errors that may occur during the database operation.
@@ -285,8 +297,10 @@ export const deleteNoteOfAUserController = async (
       return;
     }
 
-    // Delete image from Cloudinary
-    await deleteImageFile(deleteNote.noteImage);
+    // Delete image from Cloudinary (only if image exists)
+    if (deleteNote.noteImage && deleteNote.noteImage.trim() !== "") {
+      await deleteImageFile(deleteNote.noteImage);
+    }
     // #region Multi-line Comment
     /**
      * Delete the note from the database.

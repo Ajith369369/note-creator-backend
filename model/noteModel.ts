@@ -6,7 +6,7 @@ export interface INote extends Document {
   noteTitle: string;
   noteContent: string;
   noteDate: string;
-  noteImage: string;
+  noteImage?: string; // Optional - notes can be created without images
   userId: string;
 }
 
@@ -30,8 +30,9 @@ const noteSchema = new Schema<INote>({
     type: String,
   },
   noteImage: {
-    required: true,
+    required: false,
     type: String,
+    default: "",
   },
   userId: {
     required: true,

@@ -14,8 +14,9 @@ const noteSchema = new Schema({
         type: String,
     },
     noteImage: {
-        required: true,
+        required: false,
         type: String,
+        default: "",
     },
     userId: {
         required: true,

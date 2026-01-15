@@ -163,7 +163,10 @@ userSchema.statics.deleteUserAndNotes = async function (
            * No session needed for file system.
            */
           // #endregion
-          await deleteImageFile(deleteNote.noteImage);
+          // Only delete image if it exists (noteImage is now optional)
+          if (deleteNote.noteImage && deleteNote.noteImage.trim() !== "") {
+            await deleteImageFile(deleteNote.noteImage);
+          }
         }
       })
     );
