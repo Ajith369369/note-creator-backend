@@ -1,9 +1,4 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+import jwt from "jsonwebtoken";
 const jwtMiddleware = (req, res, next) => {
     console.log("Inside jwt Middleware.");
     // console.log("req.headers: ", req.headers);
@@ -19,7 +14,7 @@ const jwtMiddleware = (req, res, next) => {
     // next()
     // Verify token
     try {
-        const jwtResponse = jsonwebtoken_1.default.verify(token, "ultimatesupersecretkey");
+        const jwtResponse = jwt.verify(token, "ultimatesupersecretkey");
         console.log("jwtResponse: ", jwtResponse);
         req.payload = jwtResponse.userId;
         console.log("jwtResponse.userId: ", jwtResponse.userId);
@@ -32,5 +27,5 @@ const jwtMiddleware = (req, res, next) => {
         res.status(401).json(`Authorization failed: ${error}`);
     }
 };
-exports.default = jwtMiddleware;
+export default jwtMiddleware;
 //# sourceMappingURL=jwtMiddleware.js.map

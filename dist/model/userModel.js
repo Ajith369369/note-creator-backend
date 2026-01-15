@@ -1,48 +1,10 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 // import mongoose
-const mongoose_1 = __importStar(require("mongoose"));
+import mongoose, { Schema } from "mongoose";
 // import noteModel
-const noteModel_1 = __importDefault(require("./noteModel"));
+import notes from "./noteModel.js";
 // import deleteImageFile
-const fileUtils_1 = require("../utils/fileUtils");
-const userSchema = new mongoose_1.Schema({
+import { deleteImageFile } from "../utils/fileUtils.js";
+const userSchema = new Schema({
     username: {
         required: true,
         type: String,
@@ -109,7 +71,7 @@ userSchema.statics.deleteUserAndNotes = async function (userId) {
      * This ensures that any changes made during this session are grouped together. If one operation fails, the transaction can be rolled back to undo all changes.
      */
     console.log("Inside deleteUserAndNotes().");
-    const session = await mongoose_1.default.startSession();
+    const session = await mongoose.startSession();
     session.startTransaction();
     try {
         /**
@@ -146,7 +108,7 @@ userSchema.statics.deleteUserAndNotes = async function (userId) {
          * .session(session): Associates this query with a MongoDB transaction session to ensure that all database operations within this session are part of the same transaction (used in multi-step operations).
          */
         // #endregion
-        const allNoteIdsOfNotesOfAUser = await noteModel_1.default
+        const allNoteIdsOfNotesOfAUser = await notes
             .find({ userId }, "_id")
             .lean()
             .session(session);
@@ -157,7 +119,7 @@ userSchema.statics.deleteUserAndNotes = async function (userId) {
          */
         // #endregion
         await Promise.all(allNoteIdsOfNotesOfAUser.map(async (noteId) => {
-            const deleteNote = await noteModel_1.default.findById(noteId).session(session);
+            const deleteNote = await notes.findById(noteId).session(session);
             if (!deleteNote) {
                 console.error("Note not found.");
                 throw new Error("Note not found.");
@@ -171,7 +133,10 @@ userSchema.statics.deleteUserAndNotes = async function (userId) {
                  * No session needed for file system.
                  */
                 // #endregion
-                await (0, fileUtils_1.deleteImageFile)(deleteNote.noteImage);
+                // Only delete image if it exists (noteImage is now optional)
+                if (deleteNote.noteImage && deleteNote.noteImage.trim() !== "") {
+                    await deleteImageFile(deleteNote.noteImage);
+                }
             }
         }));
         // #region Multi-line Comment
@@ -182,7 +147,7 @@ userSchema.statics.deleteUserAndNotes = async function (userId) {
          * If everything is successful, true is returned to indicate that the user and their notes were deleted.
          */
         // #endregion
-        await noteModel_1.default.deleteMany({ userId }).session(session);
+        await notes.deleteMany({ userId }).session(session);
         console.log("Notes deleted, committing transaction.");
         await session.commitTransaction();
         return true;
@@ -218,11 +183,11 @@ userSchema.statics.deleteUserAndNotes = async function (userId) {
  * Creates a model based on the userSchema and links it to the users collection in MongoDB.
  */
 // #endregion
-const users = mongoose_1.default.model("users", userSchema);
+const users = mongoose.model("users", userSchema);
 // #region Multi-line Comment
 /**
  * Makes this model available for import in other files, allowing you to perform database operations on the users collection.
  */
 // #endregion
-exports.default = users;
+export default users;
 //# sourceMappingURL=userModel.js.map

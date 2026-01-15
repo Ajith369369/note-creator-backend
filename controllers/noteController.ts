@@ -22,13 +22,17 @@ export const addNoteOfAUserController = async (
     console.log("req.file.filename: ", req.file.filename);
   }
 
-  if (!req.file) {
-    res.status(400).json({ message: "No file uploaded" });
-    return;
-  }
+  // Handle image - make it optional
+  let noteImage = ""; // Default empty string for notes without images
 
-  const noteImage = req.file.filename;
-  console.log("noteImage: ", noteImage);
+  if (req.file) {
+    // Cloudinary returns the secure URL in req.file.path
+    const cloudinaryFile = req.file as Express.CloudinaryFile;
+    noteImage = cloudinaryFile?.path || req.file.filename || "";
+    console.log("noteImage (Cloudinary URL): ", noteImage);
+  } else {
+    console.log("No image uploaded - creating note without image");
+  }
 
   // res.status(200).json("Request received.");
   try {
@@ -190,10 +194,33 @@ export const editNoteOfAUserController = async (
   const { noteTitle, noteContent, noteDate, noteImage } = req.body;
 
   // req.file: If an image file is uploaded, it will be available in req.file.
-  // req.file.filename: The name of the uploaded image file.
-  // noteImage: If no new file is uploaded, it uses the existing noteImage value from the request body.
-  // uploadNoteImage: Determines which image filename to use — either the newly uploaded image or the existing one.
-  const uploadNoteImage = req.file ? req.file.filename : noteImage;
+  // Cloudinary returns the secure URL in req.file.path
+  // noteImage: If no new file is uploaded, it uses the existing noteImage value from the request body (or empty string).
+  // uploadNoteImage: Determines which image URL to use — either the newly uploaded Cloudinary URL or the existing one.
+  let uploadNoteImage = ""; // Default empty string
+
+  if (req.file) {
+    // New image uploaded
+    const cloudinaryFile = req.file as Express.CloudinaryFile;
+    uploadNoteImage = cloudinaryFile?.path || req.file.filename || "";
+
+    // If updating with new image, delete old Cloudinary image if it exists
+    if (
+      noteImage &&
+      noteImage.trim() !== "" &&
+      noteImage.includes("cloudinary.com")
+    ) {
+      try {
+        await deleteImageFile(noteImage);
+      } catch (error) {
+        console.error("Error deleting old Cloudinary image:", error);
+        // Continue with update even if deletion fails
+      }
+    }
+  } else {
+    // No new image uploaded - keep existing image (or empty string if none)
+    uploadNoteImage = noteImage || "";
+  }
 
   // Starts a try-catch block to handle any potential errors that may occur during the database operation.
   try {
@@ -270,44 +297,10 @@ export const deleteNoteOfAUserController = async (
       return;
     }
 
-    // #region Multi-line Comment
-    /**
-     * Call the deleteImageFile function.
-     */
-    // #endregion
-    await deleteImageFile(deleteNote.noteImage);
-
-    // #region Multi-line Comment
-    /**
-     * Constructing the image file path
-     * path.join(): This constructs the full path to the image file associated with the note.
-     * __dirname: Refers to the current directory (where this code resides).
-     * '..': Moves up one level in the directory structure (to the parent folder).
-     * 'uploads': Points to the "uploads" folder where the image files are stored.
-     * note.noteImage: The image filename stored in the note document in the database. The noteImage field contains just the filename, not the full path.
-     */
-    // #endregion
-    /* const imagePath = path.join(
-      __dirname,
-      "..",
-      "uploads",
-      deleteNote.noteImage
-    ); */
-
-    // #region Multi-line Comment
-    /**
-     * Deleting the image from the file system (uploads folder)
-     * fs.unlink(): Deletes the image file from the file system. It takes the imagePath as the first argument and a callback function as the second argument.
-     * err: If an error occurs during deletion (e.g., the file doesn't exist), it's handled inside the callback, where it logs the error to the console.
-     */
-    // #endregion
-    /* fs.unlink(imagePath, (err) => {
-      if (err) {
-        console.error("Error while deleting the image file: ", err);
-      } else {
-        console.log("Successfully deleted the image file.");
-      }
-    }); */
+    // Delete image from Cloudinary (only if image exists)
+    if (deleteNote.noteImage && deleteNote.noteImage.trim() !== "") {
+      await deleteImageFile(deleteNote.noteImage);
+    }
     // #region Multi-line Comment
     /**
      * Delete the note from the database.

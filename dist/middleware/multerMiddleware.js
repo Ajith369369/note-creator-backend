@@ -1,36 +1,53 @@
-"use strict";
-// multer stores and handles the uploaded file in server-side.
-// MongoDB stores the name of folder in which multer has stored the uploaded file.
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const multer_1 = __importDefault(require("multer"));
-// storage
-const storage = multer_1.default.diskStorage({
-    destination: (_req, _file, callback) => {
-        callback(null, "./uploads");
-    },
-    filename: (_req, file, callback) => {
-        const filename = `image-${Date.now()}-${file.originalname}`;
-        callback(null, filename);
-    },
-});
-// filter
+// multer stores and handles the uploaded file in server-side using Cloudinary.
+// MongoDB stores the Cloudinary URL of the uploaded file.
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../utils/cloudinary.js";
+// Enterprise-grade file filter with proper MIME type checking
 const fileFilter = (_req, file, callback) => {
-    if (file.mimetype == "image/png" ||
-        file.mimetype == "image/jpg" ||
-        file.mimetype == "image/jpeg") {
+    // Strict MIME type validation
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg"];
+    if (allowedMimeTypes.includes(file.mimetype)) {
         callback(null, true);
     }
     else {
-        callback(null, false);
-        callback(new Error("Only png, jpg, jpeg files are allowed."));
+        callback(new Error(`Invalid file type. Only ${allowedMimeTypes.join(", ")} are allowed.`));
     }
 };
-const multerConfig = (0, multer_1.default)({
+const cloudinaryParams = {
+    folder: "note-creator-uploads", // Organized folder structure
+    allowed_formats: ["jpg", "jpeg", "png"], // Explicit format restriction
+    resource_type: "image",
+    // Enterprise optimizations
+    transformation: [
+        {
+            quality: "auto:good", // Automatic quality optimization
+            fetch_format: "auto", // Auto WebP when supported
+            width: 1920, // Max width for optimization
+            height: 1080, // Max height for optimization
+            crop: "limit", // Don't crop, just limit size
+        },
+    ],
+    // Generate unique filename
+    public_id: (_req, file) => {
+        const timestamp = Date.now();
+        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+        return `image-${timestamp}-${sanitizedName}`;
+    },
+};
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params: cloudinaryParams, // Type assertion needed due to incomplete library types
+});
+// Multer configuration with limits for security
+const multerConfig = multer({
     storage,
     fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit (enterprise standard)
+        files: 1, // Single file upload
+    },
 });
-exports.default = multerConfig;
+export default multerConfig;
 //# sourceMappingURL=multerMiddleware.js.map

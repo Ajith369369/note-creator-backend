@@ -8,6 +8,8 @@
     "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:prod": "npm run build && node dist/index.js",
+    "validate:build": "npm run build && echo 'Build validation successful'",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
     "lint:watch": "nodemon --watch . --ext ts --ignore dist --ignore node_modules --exec \"npm run lint || true\"",
@@ -22,12 +24,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.3",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

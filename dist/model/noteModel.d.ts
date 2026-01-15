@@ -3,7 +3,7 @@ export interface INote extends Document {
     noteTitle: string;
     noteContent: string;
     noteDate: string;
-    noteImage: string;
+    noteImage?: string;
     userId: string;
 }
 export interface INoteModel extends Model<INote> {
