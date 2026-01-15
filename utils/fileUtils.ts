@@ -1,17 +1,13 @@
 // #region Multi-line Comment
 /**
- * fs: The file system module from Node.js is used to interact with the file system. It allows you to read, write, delete, and manipulate files.
+ * Image deletion utility with Cloudinary support.
+ * Supports both Cloudinary URLs and legacy local file paths for backward compatibility.
  */
 // #endregion
 import fs from "fs";
-
-// #region Multi-line Comment
-/**
- * path: This module provides utilities for working with file and directory paths. It's helpful for constructing file paths that work across different operating systems.
- */
-// #endregion
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+import { deleteFromCloudinary } from "./cloudinary.js";
 
 // ES modules don't have __dirname, so we need to create it from import.meta.url
 const __filename = fileURLToPath(import.meta.url);
@@ -19,90 +15,58 @@ const __dirname = dirname(__filename);
 
 // #region Multi-line Comment
 /**
- * Creating utility functions, that can be used in any controller.
- * Functionalities that are needed in multiple controllers or places in the application.
- *
- * Code Reusability: We can reuse these functions across multiple controllers without duplicating code.
- *
- * Clean Controllers: Our controllers remain clean and focused on handling HTTP requests and responses.
- *
- * Easier Maintenance: If we need to change these functions' logic in the future, we only need to update it in one place.
+ * Delete image from Cloudinary or local filesystem (enterprise-grade)
+ * Supports both Cloudinary URLs and legacy local file paths
+ * @param imageUrlOrId - Cloudinary URL, public ID, or local file path
  */
 // #endregion
+export const deleteImageFile = async (imageUrlOrId: string): Promise<void> => {
+  try {
+    // Check if it's a Cloudinary URL
+    if (imageUrlOrId.includes("cloudinary.com")) {
+      // Cloudinary URL - extract public_id and delete
+      await deleteFromCloudinary(imageUrlOrId);
+      return;
+    }
 
-// #region Multi-line Comment
-/**
- * Function to delete the image file based on the noteImage.
- *
- * The deleteImageFile function is designed to delete an image file from the filesystem asynchronously, leveraging promises to handle success and error states. This design allows the function to be easily integrated into an async/await flow, improving the readability and maintainability of the code.
- *
- * This line declares an asynchronous function named deleteImageFile. It takes a single parameter, noteImage, which is the filename of the image you want to delete.
- */
-// #endregion
-export const deleteImageFile = async (noteImage: string): Promise<void> => {
-  // #region Multi-line Comment
-  /**
-   * Constructing the image file path. This line constructs the full path to the image file that needs to be deleted.
-   *
-   * path.join(): This constructs the full path to the image file associated with the note. It is a method from the path module that safely concatenates paths, ensuring that the correct path separators are used for the operating system.
-   *
-   * __dirname: It is a Node.js global variable that returns the directory name of the current module (i.e., the directory where the current file is located). Refers to the current directory (where this code resides).
-   *
-   * '..': Moves up one level in the directory structure (to the parent folder).
-   *
-   * 'uploads': Points to the "uploads" folder where the image files are stored.
-   *
-   * note.noteImage: The image filename stored in the note document in the database. The noteImage field contains just the filename, not the full path.
-   *
-   * This results in a path that points to the "uploads" directory, where the image files are stored.
-   */
-  // #endregion
-  const imagePath = path.join(__dirname, "..", "uploads", noteImage);
+    // Check if it's a URL (other cloud storage)
+    if (imageUrlOrId.startsWith("http")) {
+      // Other cloud storage URL - log but don't error
+      console.log(
+        "Non-Cloudinary URL detected, skipping deletion:",
+        imageUrlOrId
+      );
+      return;
+    }
 
-  // #region Multi-line Comment
-  /**
-   * Promise constructor.
-   * Creating a Promise: This line creates a new Promise that will handle the asynchronous operation of deleting the file.
-   * The promise takes two callback functions: resolve (to indicate success) and reject (to indicate failure).
-   */
-  // #endregion
-  return new Promise<void>((resolve, reject) => {
-    // #region Multi-line Comment
-    /**
-     * Deleting the image from the file system (uploads folder)
-     *
-     * fs.unlink(): Deletes the image file from the file system. It takes the imagePath as the first argument and a callback function as the second argument.
-     *
-     * The callback function (err) => {} will be executed once the operation is complete, receiving an err argument if an error occurs.
-     * err: If an error occurs during deletion (e.g., the file doesn't exist), it's handled inside the callback, where it logs the error to the console.
-     */
-    // #endregion
-    fs.unlink(imagePath, (err) => {
-      if (err) {
-        // If the file doesn't exist (ENOENT), that's actually the desired state
-        // The file is already deleted or never existed, so we treat it as success
-        if (err.code === "ENOENT") {
-          console.log(
-            "Image file does not exist (already deleted or never existed):",
-            imagePath
-          );
-          resolve();
+    // Legacy local file - handle for backward compatibility
+    // This allows migration period where old files might still exist
+    const imagePath = path.join(__dirname, "..", "uploads", imageUrlOrId);
+
+    return new Promise<void>((resolve, reject) => {
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          // If the file doesn't exist (ENOENT), that's actually the desired state
+          if (err.code === "ENOENT") {
+            console.log(
+              "Local image file does not exist (already deleted or never existed):",
+              imagePath
+            );
+            resolve();
+          } else {
+            // For other errors, log and reject
+            console.error("Error while deleting the local image file: ", err);
+            reject(err);
+          }
         } else {
-          // For other errors, log and reject
-          console.error("Error while deleting the image file: ", err);
-          reject(err);
+          console.log("Successfully deleted the local image file.");
+          resolve();
         }
-      } else {
-        console.log("Successfully deleted the image file.");
-
-        // #region Multi-line Comment
-        /**
-         * Resolving the Promise: This line calls resolve(), which indicates that the promise has been fulfilled successfully. This allows any code that was waiting for this promise to continue its execution.
-         * Resolve the promise on successful deletion.
-         */
-        // #endregion
-        resolve();
-      }
+      });
     });
-  });
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    // Don't throw - allow operation to continue
+    // Log for monitoring and alerting
+  }
 };

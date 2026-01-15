@@ -95,8 +95,22 @@ Create a `.env` file in the root directory with:
 
 ```
 PORT=3500
-MONGODB_URI=your_mongodb_connection_string
+DATABASE=your_mongodb_connection_string
+
+# Cloudinary Configuration (for image uploads)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
+
+### Getting Cloudinary Credentials
+
+1. Sign up for a free account at [https://cloudinary.com](https://cloudinary.com)
+2. Go to your Dashboard
+3. Copy your `Cloud Name`, `API Key`, and `API Secret`
+4. Add them to your `.env` file
+
+**Note**: Without Cloudinary credentials, image uploads will fail. The application will log a warning on startup if credentials are missing.
 
 ## API Endpoints
 

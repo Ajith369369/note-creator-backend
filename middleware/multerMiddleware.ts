@@ -1,42 +1,77 @@
-// multer stores and handles the uploaded file in server-side.
-// MongoDB stores the name of folder in which multer has stored the uploaded file.
+// multer stores and handles the uploaded file in server-side using Cloudinary.
+// MongoDB stores the Cloudinary URL of the uploaded file.
 
-import multer, { FileFilterCallback } from "multer";
 import { Request } from "express";
+import multer, { FileFilterCallback } from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../utils/cloudinary.js";
 
-// storage
-const storage = multer.diskStorage({
-  destination: (_req: Request, _file: Express.Multer.File, callback: (error: Error | null, destination: string) => void) => {
-    callback(null, "./uploads");
-  },
-  filename: (_req: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
-    const filename = `image-${Date.now()}-${file.originalname}`;
-    callback(null, filename);
-  },
-});
-
-// filter
+// Enterprise-grade file filter with proper MIME type checking
 const fileFilter = (
   _req: Request,
   file: Express.Multer.File,
   callback: FileFilterCallback
 ): void => {
-  if (
-    file.mimetype == "image/png" ||
-    file.mimetype == "image/jpg" ||
-    file.mimetype == "image/jpeg"
-  ) {
+  // Strict MIME type validation
+  const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
     callback(null, true);
   } else {
-    callback(null, false);
-    callback(new Error("Only png, jpg, jpeg files are allowed."));
+    callback(
+      new Error(
+        `Invalid file type. Only ${allowedMimeTypes.join(", ")} are allowed.`
+      )
+    );
   }
 };
 
+// Cloudinary storage configuration with enterprise best practices
+// Note: Using Record type for params as multer-storage-cloudinary types are incomplete
+interface CloudinaryStorageParams {
+  folder: string;
+  allowed_formats: string[];
+  resource_type: string;
+  transformation: Array<Record<string, string | number>>;
+  public_id: (_req: Request, file: Express.Multer.File) => string;
+}
+
+const cloudinaryParams: CloudinaryStorageParams = {
+  folder: "note-creator-uploads", // Organized folder structure
+  allowed_formats: ["jpg", "jpeg", "png"], // Explicit format restriction
+  resource_type: "image",
+  // Enterprise optimizations
+  transformation: [
+    {
+      quality: "auto:good", // Automatic quality optimization
+      fetch_format: "auto", // Auto WebP when supported
+      width: 1920, // Max width for optimization
+      height: 1080, // Max height for optimization
+      crop: "limit", // Don't crop, just limit size
+    },
+  ],
+  // Generate unique filename
+  public_id: (_req: Request, file: Express.Multer.File): string => {
+    const timestamp = Date.now();
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    return `image-${timestamp}-${sanitizedName}`;
+  },
+};
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params: cloudinaryParams as any, // Type assertion needed due to incomplete library types
+});
+
+// Multer configuration with limits for security
 const multerConfig = multer({
   storage,
   fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit (enterprise standard)
+    files: 1, // Single file upload
+  },
 });
 
 export default multerConfig;
-
